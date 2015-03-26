@@ -1,6 +1,6 @@
 # geo-provenance
 
-This project contains tools for geocoding the *geoprovenance* of webresources.
+This project contains tools for inferring the *geoprovenance* of webresources.
 A web page's geoprovenance is the home country for the original publisher of the information contained in the web page.
 
 The geoprovenance of:
