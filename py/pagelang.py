@@ -1,12 +1,15 @@
 import collections
 import os
+import langid
 
 from gputils import *
+
+from downloader import url_to_text
 
 import country
 
 
-class PagelangProvider:
+class OfflinePagelangProvider:
     def __init__(self, path=None):
         if not path: path = get_feature_data_path('pagelangs')
         if not os.path.isfile(path):
@@ -28,10 +31,22 @@ class PagelangProvider:
         warn('finished reading %d pagelang entries' % nlines)
 
     def get(self, url):
-        return self.pagelangs[url]
+        return self.pagelangs.get(url)
 
-    def contains(self, url):
-        return url in self.pagelangs
+class OnlinePagelangProvider:
+    def __init__(self, delegate=None):
+        self.delegate = delegate
+
+    def get(self, url):
+        if self.delegate:
+            result = self.delegate.get(url)
+            if result: return result
+        text = url_to_text(url)
+        if text:
+            (lang, confidence) = langid.classify(text)
+            if confidence >= 0.9:
+                return lang
+        return None
 
 
 class CountrylangProvider:
@@ -57,16 +72,13 @@ class CountrylangProvider:
             sum_scores = 1.0 * sum([s for (s, c) in country_scores]) + 0.000001
             self.lang_countries[lang] = [(c, score/sum_scores) for (score, c) in country_scores]
 
-    def contains(self, lang):
-        return lang in self.lang_countries
-
     def get(self, lang):
-        return self.lang_countries[lang]
+        return self.lang_countries.get(lang)
 
 
 class PagelangsFeature:
     def __init__(self, page_provider=None, country_provider=None):
-        if not page_provider: page_provider = PagelangProvider()
+        if not page_provider: page_provider = OfflinePagelangProvider()
         if not country_provider: country_provider = CountrylangProvider()
 
         self.page_provider = page_provider
@@ -75,29 +87,32 @@ class PagelangsFeature:
         self.name = 'pagelang'
 
     def infer(self, url):
-        if not self.page_provider.contains(url):
-            return (0, {})
         lang = self.page_provider.get(url)
-        if not self.country_provider.contains(lang):
+        if not lang:
             return (0, {})
 
         candidates = dict(self.country_provider.get(lang))
+        if not candidates:
+            return (0, {})
 
         return (0.70, candidates)
 
 
-def test_pagelang_provider():
-    provider = PagelangProvider('goldfeatures/pagelangs.tsv')
-    assert(not provider.contains('foo'))
-    assert(provider.contains('http://www.bfs.admin.ch/bfs/portal/de/index/themen/16/02/02/data.html'))
+def test_offline_pagelang_provider():
+    provider = OfflinePagelangProvider()
+    assert(not provider.get('foo'))
     assert(provider.get('http://www.bfs.admin.ch/bfs/portal/de/index/themen/16/02/02/data.html') == 'de')
+
+
+def test_online_pagelang_provider():
+    provider = OnlinePagelangProvider()
+    assert(provider.get('http://www.shilad.com') == 'en')
 
 
 def test_country_provider():
 
     provider = CountrylangProvider()
-    assert(not provider.contains('foo'))
-    assert(provider.contains('en'))
+    assert(not provider.get('foo'))
     en = provider.get('en')
     assert(en[0][0] == 'us')
     assert(abs(en[0][1] - 0.6664) < 0.001)
@@ -121,7 +136,7 @@ def test_country_provider():
 
 
 def test_feature():
-    page_provider = PagelangProvider('goldfeatures/pagelangs.tsv')
+    page_provider = OfflinePagelangProvider('goldfeatures/pagelangs.tsv')
     country_provider = CountrylangProvider()
     feature = PagelangsFeature(page_provider, country_provider)
     assert(feature.infer('foo') == (0, {}))

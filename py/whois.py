@@ -2,7 +2,7 @@ import os
 
 from gputils import *
 
-class BatchWhoisProvider:
+class OfflineWhoisProvider:
     def __init__(self, path=None):
         if not path: path = get_feature_data_path('whois')
         if not os.path.isfile(path):
@@ -48,7 +48,7 @@ class BatchWhoisProvider:
 
 class ParsedWhoisFeature:
     def __init__(self, provider=None):
-        if not provider: provider = BatchWhoisProvider()
+        if not provider: provider = OfflineWhoisProvider()
         self.provider = provider
         self.name = 'parsed_whois'
 
@@ -61,7 +61,7 @@ class ParsedWhoisFeature:
 
 class FreetextWhoisFeature:
     def __init__(self, provider=None):
-        if not provider: provider = BatchWhoisProvider()
+        if not provider: provider = OfflineWhoisProvider()
         self.provider = provider
         self.name = 'freetext_whois'
 
@@ -72,7 +72,7 @@ class FreetextWhoisFeature:
             return (0, {})
 
 def test_parsed_whois():
-    provider = BatchWhoisProvider('goldfeatures/whois.tsv')
+    provider = OfflineWhoisProvider('goldfeatures/whois.tsv')
     assert(not provider.containsParsed('foo'))
     assert(provider.containsParsed('http://www.unesco.org/foo/bar'))
     assert(provider.getParsed('http://www.unesco.org/foo/bar') == 'fr')
@@ -81,6 +81,6 @@ def test_parsed_whois():
 
 
 def test_freetext_whois():
-    provider = BatchWhoisProvider('goldfeatures/whois.tsv')
+    provider = OfflineWhoisProvider('goldfeatures/whois.tsv')
     assert(provider.containsFreetext('http://foo.google.ca/foo/bar'))
     assert(provider.getFreetext('http://foo.google.ca/foo/bar'), {'us' : 0.5, 'ca' : 0.5})

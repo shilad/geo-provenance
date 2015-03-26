@@ -62,6 +62,12 @@ class LogisticInferrer:
             self.coefficients = coefficients
         self.countries = read_countries()
 
+    def get_feature(self, name):
+        for f in self.features:
+            if f.name == name:
+                return f
+        return None
+
     def make_rows(self, url_info):
         rows = collections.defaultdict(list)
 
