@@ -24,3 +24,4 @@ The logistic regression classification model used in this package is trained usi
 * Shilad Sen developed the geoprovenance inference algorithm and software.
 * Dave Musicant developed the code to extract country names from whois queries.
 * Heather Ford led development of GeoProv198, with major assistance from Brent Hecht and minor assistance from Dave Musicant, Shilad Sen, and Mark Graham.
+* Matthew Zook provided some early guidance on the design of our algorithm.
