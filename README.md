@@ -10,8 +10,10 @@ More details are provided in our [2015 CHI paper](http://www-users.cs.umn.edu/~b
 
 ### Using this Library
 
-Warning: Ability to code new URLs awaiting whois scripts from Dave Musicant.
-
+TODO BEFORE OFFICIAL RELEASE:
+* Incorporate whois scripts from Dave so we can accommodate new domains
+* Figure out which Python dependencies need to be installed.
+* Complete my documentation once this is done.
 
 ### The GeoProv198 Dataset
 
