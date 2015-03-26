@@ -15,6 +15,8 @@ TODO BEFORE OFFICIAL RELEASE:
 * Figure out which Python dependencies need to be installed.
 * Complete my documentation once this is done.
 
+Batch data available at https://www.dropbox.com/s/hq5ogzrd2jobwwh/geo-provenance-features.zip?dl=0
+
 ### The GeoProv198 Dataset
 
 The logistic regression classification model used in this package is trained using a gold standard dataset that maps urls to countries. This dataset is available in the [data](https://github.com/shilad/geo-provenance/blob/master/data/geoprov198.tsv) directory and its collection methodology is described in the citation above.
