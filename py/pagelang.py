@@ -1,6 +1,7 @@
 import collections
 import os
 import langid
+import sys
 
 from gputils import *
 
@@ -41,11 +42,14 @@ class OnlinePagelangProvider:
         if self.delegate:
             result = self.delegate.get(url)
             if result: return result
-        text = url_to_text(url)
-        if text:
-            (lang, confidence) = langid.classify(text)
-            if confidence >= 0.9:
-                return lang
+        try:
+            text = url_to_text(url)
+            if text:
+                (lang, confidence) = langid.classify(text)
+                if confidence >= 0.9:
+                    return lang
+        except:
+            warn('language detection scraping for %s failed: %s' % (url, sys.exc_info()[1]))
         return None
 
 

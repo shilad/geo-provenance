@@ -5,7 +5,6 @@
 #
 
 
-import json
 import sys
 import time
 import traceback
@@ -16,17 +15,32 @@ from pagelang import OnlinePagelangProvider
 
 
 def main(inferrer, input, output, known_domains=None):
+    format = lambda x: '%.4f' % x
     for line in input:
         url = line.split()[0]
         if not url:
             continue
         d = url2registereddomain(url)
         if known_domains and d not in known_domains:
+            warn('domain %s unknown' % d)
             continue
         try:
             (conf, dist) = inferrer.infer(url)
-            output.write(url + '\t' + json.dumps(dist) + '\n')
-            output.flush()
+            if dist:
+                items = list(dist.items())
+                items.sort(key=lambda x: x[1], reverse=True)
+                (maxcountry, maxp) = items[0]
+                json = '{'
+                for (i, (c, p)) in enumerate(items[:10]):
+                    if i != 0:
+                        json += ', '
+                    json += "'%s' : %s" % (c, format(p))
+                json += '}'
+                output.write(url + '\t' + maxcountry + '\t' + format(maxp) + '\t' + json + '\n')
+                output.flush()
+            else:
+                output.write(url + '\tunknown\t0.0\t{}\n')
+                output.flush()
         except:
             warn('url %s failed: ' + url)
             traceback.print_exc()
