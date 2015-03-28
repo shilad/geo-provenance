@@ -1,12 +1,15 @@
 # geo-provenance
 
-This project contains tools for geocoding the *geoprovenance* of webresources.
+This project contains tools for inferring the *geoprovenance* of webresources.
 A web page's geoprovenance is the home country for the original publisher of the information contained in the web page.
-For a web resource created by a company or organization, this would be the headquarters of the country.
-For an individual author, it would that individual's home country.
-For a book, it would be the country associated with the publisher of the book.
 
-More details are provided in our [2015 CHI paper](http://www-users.cs.umn.edu/~bhecht/publications/localnessgeography_CHI2015.pdf). If you use this software in an academic publication, please cite it as follows: Sen, S., Ford, H., Musicant, D., Graham, M., Keyes, O., and Hecht, B. 2015. "Barriers to the Localness of Volunteered Geographic Information." *Proceedings of CHI 2015.* New York: ACM Press.
+The geoprovenance of:
+* A web resource created by a company or organization is the country where its headquarters are located.
+* A web resource created by an individual author is that individual's home country.
+* A book is the country associated with the publisher of the book.
+* More details are provided in our [2015 CHI paper](http://www-users.cs.umn.edu/~bhecht/publications/localnessgeography_CHI2015.pdf). 
+
+If you use this software in an academic publication, please cite it as follows: Sen, S., Ford, H., Musicant, D., Graham, M., Keyes, O., and Hecht, B. 2015. "[Barriers to the Localness of Volunteered Geographic Information](http://www-users.cs.umn.edu/~bhecht/publications/localnessgeography_CHI2015.pdf)." *Proceedings of CHI 2015.* New York: ACM Press.
 
 ### Using this Library
 
@@ -14,6 +17,8 @@ TODO BEFORE OFFICIAL RELEASE:
 * Incorporate whois scripts from Dave so we can accommodate new domains
 * Figure out which Python dependencies need to be installed.
 * Complete my documentation once this is done.
+
+Batch data available at https://www.dropbox.com/s/hq5ogzrd2jobwwh/geo-provenance-features.zip?dl=0
 
 ### The GeoProv198 Dataset
 
