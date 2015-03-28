@@ -1,3 +1,18 @@
+"""
+A module to infer the country of a webpage by detecting its language and then
+ identifying the most likely countries to write in that language.
+
+ Code for scraping webpages can be found in the "downloader" module.
+ The language of a webpage is inferred using Python's langid module.
+ The mapping from language to most likely countries is calculated by
+ combining prior probabilities for a country generating any web
+ resource with the ranking of a language's prominence for a country as
+ specified in geonames.
+
+ Author: Shilad Sen
+"""
+
+
 import collections
 import os
 import langid
@@ -10,63 +25,71 @@ from downloader import url_to_text
 import country
 
 
-class OfflinePagelangProvider:
-    def __init__(self, path=None):
-        if not path: path = get_feature_data_path('pagelangs')
-        if not os.path.isfile(path):
+class PagelangProvider:
+    """
+    Determines the language associated with a URL.
+    Caches results so that each page is crawled just once.
+    """
+    def __init__(self, cache_path=None):
+        if not cache_path: cache_path = get_feature_data_path('pagelangs')
+        if not os.path.isfile(cache_path):
             raise GPException('page language results not available...')
+        self.cache_path = cache_path
 
         warn('reading pagelang results...')
         nlines = 0
         self.pagelangs = {}
-        for line in gp_open(path):
+        for line in gp_open(self.cache_path):
             tokens = line.strip().split('\t')
             if len(tokens) == 2:
                 url = tokens[0]
                 cc = tokens[1]
-                if cc != 'unknown':
-                    self.pagelangs[url] = cc
+                if cc == 'unknown':
+                    cc = None
+                self.pagelangs[url] = cc
                 nlines += 1
             else:
                 warn('invalid pagelang line: %s' % `line`)
         warn('finished reading %d pagelang entries' % nlines)
 
     def get(self, url):
-        return self.pagelangs.get(url)
+        if url not in self.pagelangs:
+            lang = None
+            try:
+                text = url_to_text(url)
+                if text:
+                    (l, confidence) = langid.classify(text)
+                    if confidence >= 0.9:
+                        lang = l
+            except:
+                warn('language detection scraping for %s failed: %s' % (url, sys.exc_info()[1]))
+            self.pagelangs[url] = lang
+            self.add_cache_line(url + u'\t' + (lang if lang else 'unknown'))
+        return self.pagelangs[url]
 
-class OnlinePagelangProvider:
-    def __init__(self, delegate=None):
-        self.delegate = delegate
-
-    def get(self, url):
-        if self.delegate:
-            result = self.delegate.get(url)
-            if result: return result
-        try:
-            text = url_to_text(url)
-            if text:
-                (lang, confidence) = langid.classify(text)
-                if confidence >= 0.9:
-                    return lang
-        except:
-            warn('language detection scraping for %s failed: %s' % (url, sys.exc_info()[1]))
-        return None
+    def add_cache_line(self, line):
+        f = gp_open(self.cache_path, 'a')
+        f.write(line + u'\n')
+        f.close()
 
 
 class CountrylangProvider:
+    """
+    Determines the mapping between languages and most likely countries.
+    """
     def __init__(self, countries=None):
         if not countries:
             countries = country.read_countries()
         iso_countries = dict([(c.iso, c) for c in countries])
 
-        total_pop = sum([c.population for c in countries])
-
         # calculate language to country mapping
+        # Number of second-language speakers (or higher) for a country c
+        # and language l is a function of l's rank popularity for c.
+        # The function is exponentially decreasing.
         lang2countries = collections.defaultdict(list)
         for c in iso_countries.values():
             for (i, l) in enumerate(c.cleaned_langs):
-                p = 1.0 * c.population / total_pop
-                s = p * 1.0 / ((i+1) ** 2.5)
+                s = c.prior * 1.0 / ((i+1) ** 2.5)
                 lang2countries[l].append((s, c.iso))
 
         self.lang_countries = {}
@@ -82,7 +105,7 @@ class CountrylangProvider:
 
 class PagelangsFeature:
     def __init__(self, page_provider=None, country_provider=None):
-        if not page_provider: page_provider = OfflinePagelangProvider()
+        if not page_provider: page_provider = PagelangProvider()
         if not country_provider: country_provider = CountrylangProvider()
 
         self.page_provider = page_provider
@@ -103,13 +126,13 @@ class PagelangsFeature:
 
 
 def test_offline_pagelang_provider():
-    provider = OfflinePagelangProvider()
+    provider = PagelangProvider()
     assert(not provider.get('foo'))
     assert(provider.get('http://www.bfs.admin.ch/bfs/portal/de/index/themen/16/02/02/data.html') == 'de')
 
 
 def test_online_pagelang_provider():
-    provider = OnlinePagelangProvider()
+    provider = PagelangProvider()
     assert(provider.get('http://www.shilad.com') == 'en')
 
 
@@ -140,7 +163,7 @@ def test_country_provider():
 
 
 def test_feature():
-    page_provider = OfflinePagelangProvider('goldfeatures/pagelangs.tsv')
+    page_provider = PagelangProvider()
     country_provider = CountrylangProvider()
     feature = PagelangsFeature(page_provider, country_provider)
     assert(feature.infer('foo') == (0, {}))

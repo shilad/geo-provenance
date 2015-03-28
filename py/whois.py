@@ -44,11 +44,13 @@ class WhoisProvider:
         self.cache = {}
         f = gp_open(self.cache_path)
         for line in f:
-            tokens = line.strip().split('\t')
+            tokens = line.split('\t')
             if len(tokens) == 2:
-                domain = tokens[0]
-                whois = tokens[1]
-                if whois.endswith('|p'):
+                domain = tokens[0].strip()
+                whois = tokens[1].strip()
+                if not whois:
+                    self.cache[domain] = {}
+                elif whois.endswith('|p'):
                     country = whois[:-2]
                     if country != '??': self.cache[domain] = country
                 else:
@@ -59,7 +61,7 @@ class WhoisProvider:
                     total = 1.0 * sum(dist.values())
                     if sum > 0:
                         for c in dist: dist[c] /= total
-                        self.cache[domain] = dist
+                    self.cache[domain] = dist
                 nlines += 1
             else:
                 warn('invalid whois line: %s' % `line`)
@@ -100,46 +102,68 @@ class WhoisProvider:
         return self.cache[d]
 
     def add_to_cache(self, domain):
-        raw = retrieve_whois_record(domain)
-        parsed = extract_parsed_whois_country(raw, self.countries, self.aliases)
-        if parsed:
-            self.cache[domain] = parsed
-            self.add_cache_line(domain + u'\t' + parsed + '|p')
-        else:
-            freetext = extract_freetext_whois_country(raw, self.regexes)
-            if freetext:
-                self.cache[domain] = freetext
-                pairs = [u'%s|%s' % (cc, n) for (cc, n) in freetext.items()]
-                self.add_cache_line(domain + u'\t' + u','.join(pairs))
+        raw = None
+        try:
+            raw = retrieve_whois_record(domain)
+        except:
+            warn('whois lookup for %s failed: %s' % (domain, sys.exc_info()[1]))
+            self.cache[domain] = {}
+            self.add_cache_line(domain + u'\t')
+            return
+
+        try:
+            parsed = extract_parsed_whois_country(raw, self.countries, self.aliases)
+            if parsed:
+                self.cache[domain] = parsed
+                self.add_cache_line(domain + u'\t' + parsed + '|p')
+                return
+        except:
+            warn('parsing of whois record for %s failed: %s. Resorting to freetext method.'
+                 % (domain, sys.exc_info()[1]))
+
+        freetext = extract_freetext_whois_country(raw, self.regexes)
+        if freetext:
+            self.cache[domain] = freetext
+            pairs = [u'%s|%s' % (cc, n) for (cc, n) in freetext.items()]
+            self.add_cache_line(domain + u'\t' + u','.join(pairs))
 
     def add_cache_line(self, line):
         f = gp_open(self.cache_path, 'a')
         f.write(line + u'\n')
         f.close()
 
+PROVIDER_INST = None
+
 class ParsedWhoisFeature:
     def __init__(self, provider=None):
-        if not provider: provider = WhoisProvider()
+        global PROVIDER_INST
+        if not provider:
+            if not PROVIDER_INST: PROVIDER_INST = WhoisProvider()
+            provider = PROVIDER_INST
         self.provider = provider
         self.name = 'parsed_whois'
 
     def infer(self, url):
         r = self.provider.getParsed(url)
         if r:
-            return (0.60, r)
+            return (0.60, { r : 1.0 })
         else:
             return (0, {})
 
 class FreetextWhoisFeature:
     def __init__(self, provider=None):
-        if not provider: provider = WhoisProvider()
+        global PROVIDER_INST
+        if not provider:
+            if not PROVIDER_INST: PROVIDER_INST = WhoisProvider()
+            provider = PROVIDER_INST
         self.provider = provider
         self.name = 'freetext_whois'
 
     def infer(self, url):
         r = self.provider.getFreetext(url)
         if r:
-            return (0.60, r)
+            t = 1.0 * sum(r.values())
+            return 0.6, dict((c, n / t) for c, n in r.items())
         else:
             return (0, {})
 
@@ -164,7 +188,6 @@ def extract_parsed_whois_country(records, countries, aliases):
     if contact_countries:
         for type in ('admin', 'tech', 'registrant'):
             if type in contact_countries:
-                print 'returning', type
                 return contact_countries[type]
         return list(contact_countries.values())[0]
 
@@ -203,11 +226,16 @@ def normalize_country(raw, countries, aliases):
     return aliases.get(raw) # may be none
 
 def build_regexes(aliases):
+    warn('building country alias regexes')
+    n = 0
     regexes = {}
     for (cc, aliases) in aliases.items():
-        if cc != 'us': continue
-        pattern = "(^|\\b)(" + '|'.join(aliases) + ')($|\\b)'
+        if cc == 'atrysh': print aliases
+        orred = '|'.join(re.escape(a) for a in aliases)
+        pattern = "(^|\\b)(" + orred + ')($|\\b)'
         regexes[cc] = re.compile(pattern)
+        n += len(aliases)
+    warn('finished building %d country alias regexes' % n)
     return regexes
 
 
@@ -215,8 +243,8 @@ def read_aliases(dir=DATA_DIR):
     ambiguous = {}
     for line in gp_open(dir + '/manual_aliases.tsv'):
         tokens = line.split('\t')
-        code = tokens[0].strip().lower()
-        alias = tokens[1].strip().lower()
+        alias = tokens[0].strip().lower()
+        code = tokens[1].strip().lower()
         ambiguous[alias] = code
 
     mapping = dict(ambiguous)
@@ -248,7 +276,7 @@ def test_parsed_provider():
 
 def test_freetext_provider():
     provider = WhoisProvider()
-    assert(provider.getFreetext('http://foo.google.ca/foo/bar'), {'us' : 0.5, 'ca' : 0.5})
+    assert(provider.getFreetext('http://foo.google.ca/foo/bar') == {'us' : 0.5, 'ca' : 0.5})
 
 def test_online_whois():
     countries = read_countries()
@@ -259,6 +287,8 @@ def test_online_whois():
     records = retrieve_whois_record('porsche.com')
     assert(extract_parsed_whois_country(records, countries, aliases) == 'de')
 
+
+
 def test_freetext_whois():
     aliases = read_aliases()
     records = retrieve_whois_record('macalester.edu')
@@ -267,3 +297,50 @@ def test_freetext_whois():
     freetext = extract_freetext_whois_country(records, regexes)
     assert(freetext == {'us' : 3})
 
+
+def test_regex():
+    aliases = read_aliases()
+    regexes = build_regexes(aliases)
+    records = [
+        """
+%
+%AM TLD whois server #2
+%
+
+   Domain name: tert.am
+   Registar:    abcdomain (ABCDomain LLC)
+   Status:      active
+
+   Registrant:
+      TERT AM LLC
+      Krivoy alley, home 22
+      Yerevan,  0015
+      AM
+
+   Administrative contact:
+      TERT AM LLC
+      Krivoy alley, home 22
+      Yerevan, 0015
+      AM
+      editor@tert.am
+      060528528, 096837826
+
+   Technical contact:
+      TERT AM LLC
+      Krivoy alley, home 22
+      Yerevan, 0015
+      AM
+      sardaryan.h@gmail.com
+      060528528, 096837826
+
+   DNS servers:
+      ivy.ns.cloudflare.com
+      nick.ns.cloudflare.com
+
+   Registered:    2013-07-01
+   Last modified: 2015-01-28
+   Expires:       2016-07-01
+        """
+        ]
+    freetext = extract_freetext_whois_country(records, regexes)
+    assert(freetext == None)

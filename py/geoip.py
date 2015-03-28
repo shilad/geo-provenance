@@ -78,18 +78,13 @@ class GeoIPFeature:
             return (0, {})
 
 
-
 def test_geoip():
     provider = GeoIpProvider()
     assert(not provider.get('foo'))
     assert(provider.get('http://www.ac.gov.br') == 'br')
     assert(provider.get('https://www.ac.gov.br') == 'br')
+    assert(provider.get('https://www.shilad.com') == 'us')
 
-
-# def test_milgov():
-#     f = MilGovFeature()
-#     assert(f.infer_dist('http://foo.bbc.com/bar') == (0, {}))
-#     assert(f.infer_dist('https://whitehouse.gov/blah/de') == (1.0, { 'us' : 1.0}))
 
 def test_url2country():
     assert(geocode_url('https://google.com/foo') == 'us')

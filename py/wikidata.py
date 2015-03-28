@@ -41,8 +41,9 @@ class WikidataFeature:
         self.name = 'wikidata'
 
     def infer(self, url):
-        if self.provider.contains(url):
-            return (0.99, { self.provider.get(url) : 1.0 })
+        r = self.provider.get(url)
+        if r:
+            return (0.99, { r : 1.0 })
         else:
             return (0, {})
 
