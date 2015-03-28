@@ -1,8 +1,17 @@
+"""
+Attempts to look up the locations associated with URLs using information from Wikidata.
+
+TODO: Incorporate udpated information from the following API query:
+
+http://wdq.wmflabs.org/api?q=CLAIM[856]%20AND%20CLAIM[625]&props=856,625
+
+"""
+
 import os
 
 from gputils import *
 
-class BatchWikidataProvider:
+class WikidataProvider:
     def __init__(self, path=None):
         if not path: path = get_feature_data_path('wikidata')
         if not os.path.isfile(path):
@@ -23,14 +32,11 @@ class BatchWikidataProvider:
         warn('finished reading %d wikidata entries' % n)
 
     def get(self, url):
-        return self.domains[url2registereddomain(url)]
-
-    def contains(self, url):
-        return url2registereddomain(url) in self.domains
+        return self.domains.get(url2registereddomain(url))
 
 class WikidataFeature:
     def __init__(self, provider=None):
-        if not provider: provider = BatchWikidataProvider()
+        if not provider: provider = WikidataProvider()
         self.provider = provider
         self.name = 'wikidata'
 
@@ -41,8 +47,7 @@ class WikidataFeature:
             return (0, {})
 
 def test_wikidata():
-    provider = BatchWikidataProvider()
-    assert(not provider.contains('foo'))
-    assert(provider.contains('http://www.ac.gov.br'))
+    provider = WikidataProvider()
+    assert(not provider.get('foo'))
     assert(provider.get('http://www.ac.gov.br') == 'br')
     assert(provider.get('https://www.ac.gov.br') == 'br')

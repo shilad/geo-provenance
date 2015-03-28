@@ -1,19 +1,28 @@
+"""
+Geocodes the country of a website by geocoding the server's IP address.
+This signal is very unreliable, but may be better than nothing.
+
+ Authored by Shilad Sen.
+"""
+
+
 import traceback
 import urllib
 import os
 
 from gputils import *
 
-class BatchGeoIpProvider:
+class GeoIpProvider:
     def __init__(self, path=None):
-        if not path: path = get_feature_data_path('geoip')
-        if not os.path.isfile(path):
+        self.cache_path = path
+        if not self.cache_path: self.cache_path = get_feature_data_path('geoip')
+        if not os.path.isfile(self.cache_path):
             raise GPException('geoip results not available...')
 
         warn('reading geoip results...')
         n = 0
         self.domains = {}
-        for line in gp_open(path):
+        for line in gp_open(self.cache_path):
             tokens = line.strip().split('\t')
             if len(tokens) == 2:
                 domain = tokens[0]
@@ -25,10 +34,18 @@ class BatchGeoIpProvider:
         warn('finished reading %d geoip entries' % n)
 
     def get(self, url):
-        return self.domains[url2registereddomain(url)]
+        d = url2registereddomain(url)
+        if d not in self.domains:
+            c = geocode_url(url)
+            if c:
+                self.add_cache_line(d + u'\t' + c + u'\n')
+            self.domains[d] = c
+        return self.domains.get(d)
 
-    def contains(self, url):
-        return url2registereddomain(url) in self.domains
+    def add_cache_line(self, line):
+        f = gp_open(self.cache_path, 'a')
+        f.write(line + u'\n')
+        f.close()
 
 def geocode_url(url):
     h = url2host(url)
@@ -50,7 +67,7 @@ def geocode_url(url):
 
 class GeoIPFeature:
     def __init__(self, provider=None):
-        if not provider: provider = BatchGeoIpProvider()
+        if not provider: provider = GeoIpProvider()
         self.provider = provider
         self.name = 'geoip'
 
@@ -63,9 +80,8 @@ class GeoIPFeature:
 
 
 def test_geoip():
-    provider = BatchGeoIpProvider()
-    assert(not provider.contains('foo'))
-    assert(provider.contains('http://www.ac.gov.br'))
+    provider = GeoIpProvider()
+    assert(not provider.get('foo'))
     assert(provider.get('http://www.ac.gov.br') == 'br')
     assert(provider.get('https://www.ac.gov.br') == 'br')
 
@@ -77,18 +93,3 @@ def test_geoip():
 
 def test_url2country():
     assert(geocode_url('https://google.com/foo') == 'us')
-
-def build():
-    f = gp_open('../data/goldfeatures/geoip.tsv', 'w')
-    domains = set()
-    for (url, cc) in read_gold():
-        d = url2registereddomain(url)
-        if d not in domains:
-            domains.add(d)
-            c = geocode_url(url)
-            if c:
-                f.write(d + u'\t' + c + u'\n')
-    f.close()
-
-if __name__ == '__main__':
-    build()
