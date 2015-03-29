@@ -11,14 +11,33 @@ The geoprovenance of:
 
 If you use this software in an academic publication, please cite it as follows: Sen, S., Ford, H., Musicant, D., Graham, M., Keyes, O., and Hecht, B. 2015. "[Barriers to the Localness of Volunteered Geographic Information](http://www-users.cs.umn.edu/~bhecht/publications/localnessgeography_CHI2015.pdf)." *Proceedings of CHI 2015.* New York: ACM Press.
 
-### Using this Library
+There are a few deviations from the published algorithm (TODO fix these):
+* Does not follow links to `archive.org` and other repositories.
+* Does not handle binary files, like PDFs, Open Office docs, and Microsoft docs.
+* Not integrated with amazon web services to scrape en-mass.
+
+### Installing necessary Python modules:
+
+```bash
+pip install tldextract
+pip install chardet
+pip install geopy
+pip install beautifulsoup4
+pip install langid
+```
+
+If you want to run the evaluator, which rebuilds the logistic regression (not necessary to use the pre-built model), you'll also need to install `sklearn`.
+
+### Running the command-line program.
+
+This 
 
 TODO BEFORE OFFICIAL RELEASE:
 * Incorporate whois scripts from Dave so we can accommodate new domains
 * Figure out which Python dependencies need to be installed.
 * Complete my documentation once this is done.
 
-Batch data available at https://www.dropbox.com/s/hq5ogzrd2jobwwh/geo-provenance-features.zip?dl=0
+A larger feature cache is available at https://www.dropbox.com/s/hq5ogzrd2jobwwh/geo-provenance-features.zip?dl=0. To use this feature cache, download and extract the zip file. You'll then need to point the module at the feature directory by either specifying the appropriate argument to the run_inferrer.py program, or by calling `gp_utils.set_feature_dir` with the appropriate absolute pathname.
 
 ### The GeoProv198 Dataset
 
