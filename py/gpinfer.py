@@ -1,10 +1,9 @@
 import collections
-import milgov, pagelang, tld, whois, wikidata
 import math
 
 from gputils import *
 from country import read_countries
-from geoip import GeoIPFeature
+# from geoip import GeoIPFeature
 from milgov import MilGovFeature
 from pagelang import PagelangsFeature
 from whois import FreetextWhoisFeature, ParsedWhoisFeature
