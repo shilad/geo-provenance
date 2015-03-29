@@ -1,9 +1,10 @@
 """
 Attempts to look up the locations associated with URLs using information from Wikidata.
 
-TODO: Incorporate udpated information from the following API query:
+Uses a precomputed mapping from domain to coordinate extracted from the Wikidata project.
+This mapping is stored in data/wikidata.json and can be rebuilt by running this Python module.
 
-http://wdq.wmflabs.org/api?q=CLAIM[856]%20AND%20CLAIM[625]&props=856,625
+Author: Shilad Sen
 
 """
 import json
@@ -14,6 +15,12 @@ import traceback
 from gputils import *
 
 class WikidataProvider:
+    """
+    Resolves a URL to a country using information from the Wikidata project.
+    Uses a precomputed mapping from domain to lat/long coordinate stored in data/wikidata.json.
+    These coordinates are geocoded to country on the fly using OpenStreetMap's nominatom API.
+    Results are cached so that domains are only geocoded once.
+    """
     def __init__(self, cache_path=None):
         if not cache_path: cache_path = get_feature_data_path('wikidata')
         if not os.path.isfile(cache_path):
