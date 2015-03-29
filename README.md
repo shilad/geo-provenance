@@ -33,7 +33,7 @@ If you want to run the evaluator, which rebuilds the logistic regression (not ne
 The `py` directory contains the `run_inferrer.py` program, which reads URLs from standard input and writes information about them to standard output. For example, if you ran the following from the shell from within the `py` directory:
 
 ```bash
-echo 'http://www.timeout.com/dublin/' | python ./run_inferrer.py
+$ echo 'http://www.timeout.com/dublin/' | python ./run_inferrer.py
 ```
 
 You would see the following output:
@@ -51,8 +51,8 @@ The program outputs the following fields:
 If you run the program from somewhere outside of the `py` directory, or would like to use a larger pre-built feature cache (see information below), you can specify the feature directory, or both the features and data directories, from the command line:
 
 ```bash
-python run_inferrer.py path/to/features/dir
-python run_inferrer.py path/to/features/dir path/to/data/dir
+$ python run_inferrer.py path/to/features/dir
+$ python run_inferrer.py path/to/features/dir path/to/data/dir
 ```
 
 ### Incorporating larger pre-built caches for speed
