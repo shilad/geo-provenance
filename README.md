@@ -1,4 +1,4 @@
-# geo-provenance
+# Geo-provenance
 
 This project contains tools for inferring the *geoprovenance* of webresources.
 A web page's geoprovenance is the home country for the original publisher of the information contained in the web page.
@@ -30,14 +30,36 @@ If you want to run the evaluator, which rebuilds the logistic regression (not ne
 
 ### Running the command-line program.
 
-This 
+The `py` directory contains the `run_inferrer.py` program, which reads URLs from standard input and writes information about them to standard output. For example, if you ran the following from the shell from within the `py` directory:
 
-TODO BEFORE OFFICIAL RELEASE:
-* Incorporate whois scripts from Dave so we can accommodate new domains
-* Figure out which Python dependencies need to be installed.
-* Complete my documentation once this is done.
+```bash
+echo 'http://www.timeout.com/dublin/' | python ./run_inferrer.py
+```
+
+You would see the following output:
+
+```text
+http://www.timeout.com/dublin/  gb      0.8259  {'gb' : 0.8259, 'us' : 0.0628, 'fr' : 0.0008, 'ca' : 0.0006, 'ru' : 0.0006, 'in' : 0.0005, 'de' : 0.0005, 'se' : 0.0005, 'it' : 0.0005, 'pl' : 0.0005}
+```
+
+The program outputs the following fields: 
+1. The URL itself.
+2. The most probable country.
+3. The estimated probability the most probable country is correct (in this case, about 83%).
+4. The top 10 candidate countries, along with their associated probabilities, in JSON format.
+
+If you run the program from somewhere outside of the `py` directory, or would like to use a larger pre-built feature cache (see information below), you can specify the feature directory, or both the features and data directories, from the command line:
+
+```bash
+python run_inferrer.py path/to/features/dir
+python run_inferrer.py path/to/features/dir path/to/data/dir
+```
+
+### Incorporating larger pre-built caches for speed
 
 A larger feature cache is available at https://www.dropbox.com/s/hq5ogzrd2jobwwh/geo-provenance-features.zip?dl=0. To use this feature cache, download and extract the zip file. You'll then need to point the module at the feature directory by either specifying the appropriate argument to the run_inferrer.py program, or by calling `gp_utils.set_feature_dir` with the appropriate absolute pathname.
+
+This cache contains information about all 7.5M URLs analyzed in our CHI paper.
 
 ### The GeoProv198 Dataset
 
@@ -46,6 +68,6 @@ The logistic regression classification model used in this package is trained usi
 ### Credits
 
 * Shilad Sen developed the geoprovenance inference algorithm and software.
-* Dave Musicant developed the code to extract country names from whois queries.
+* Dave Musicant developed the original Ruby code to extract country names from whois queries.
 * Heather Ford led development of GeoProv198, with major assistance from Brent Hecht and minor assistance from Dave Musicant, Shilad Sen, and Mark Graham.
 * Matthew Zook provided some early guidance on the design of our algorithm.
