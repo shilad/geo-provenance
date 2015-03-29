@@ -14,27 +14,51 @@ import traceback
 from gputils import *
 
 class WikidataProvider:
-    def __init__(self, path=None):
-        if not path: path = get_feature_data_path('wikidata')
-        if not os.path.isfile(path):
+    def __init__(self, cache_path=None):
+        if not cache_path: cache_path = get_feature_data_path('wikidata')
+        if not os.path.isfile(cache_path):
             raise GPException('wikidata results not available...')
+        self.cache_path = cache_path
 
         warn('reading wikidata results...')
         n = 0
         self.domains = {}
-        for line in gp_open(path):
-            tokens = line.strip().split('\t')
+        for line in gp_open(self.cache_path):
+            tokens = line.split('\t')
             if len(tokens) == 2:
-                domain = tokens[0]
-                iso = tokens[1]
+                domain = tokens[0].strip()
+                iso = tokens[1].strip()
+                if not iso: iso = None
                 self.domains[domain] = iso
                 n += 1
             else:
                 warn('invalid wikidata line: %s' % `line`)
         warn('finished reading %d wikidata entries' % n)
 
+        f = open(get_data_path('wikidata.json'))
+        self.domain_coords = json.load(f)
+        f.close()
+
     def get(self, url):
-        return self.domains.get(url2registereddomain(url))
+        domain = url2registereddomain(url)
+        if not domain:
+            return None
+        r = self.domains.get(domain)
+        if r:
+            return r
+        elif domain in self.domain_coords:
+            coords = self.domain_coords[domain]
+            cc = coord_to_country(coords)
+            self.domains[domain] = cc
+            self.add_cache_line(domain + u'\t' + (cc if cc else ''))
+            return cc
+        else:
+            return None
+
+    def add_cache_line(self, line):
+        f = gp_open(self.cache_path, 'a')
+        f.write(line + u'\n')
+        f.close()
 
 class WikidataFeature:
     def __init__(self, provider=None):
@@ -54,6 +78,7 @@ def test_wikidata():
     assert(not provider.get('foo'))
     assert(provider.get('http://www.ac.gov.br') == 'br')
     assert(provider.get('https://www.ac.gov.br') == 'br')
+    assert(provider.get('https://www.ibm.com/foo/bar') == 'us')
 
 
 def test_rebuild():
