@@ -43,6 +43,7 @@ http://www.timeout.com/dublin/  gb      0.8259  {'gb' : 0.8259, 'us' : 0.0628, '
 ```
 
 The program outputs the following fields: 
+
 1. The URL itself.
 2. The most probable country.
 3. The estimated probability the most probable country is correct (in this case, about 83%).
@@ -53,6 +54,15 @@ If you run the program from somewhere outside of the `py` directory, or would li
 ```bash
 $ python run_inferrer.py path/to/features/dir
 $ python run_inferrer.py path/to/features/dir path/to/data/dir
+```
+
+### Incorporating the module into your own Python program.
+
+```python
+import gputils
+import gpinfer
+
+
 ```
 
 ### Incorporating larger pre-built caches for speed
