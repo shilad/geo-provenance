@@ -52,8 +52,8 @@ class LogisticInferrer:
                 PagelangsFeature(),
                 TldFeature()
             ]
-            self.intercept = -6.88
-            self.coefficients = [5.05, 5.85, 2.64, 3.61, 2.76, 4.90, 7.22]
+            self.intercept = -7.06
+            self.coefficients = [2.38, 5.39, 2.06, 2.87, 2.03, 5.37, 7.03]
         else:
             if not intercept or not coefficients:
                 raise GPException("if features are specified, intercept and coefficients must be too.")
