@@ -42,9 +42,14 @@ def main(inferrer, input, output):
         time.sleep(10)
 
 if __name__ == '__main__':
-
-    # use the full dataset
-    # set_feature_dir(DATA_DIR + '/features')
+    if len(sys.argv) == 2:
+        set_feature_dir(sys.argv[1])
+    elif len(sys.argv) == 3:
+        set_feature_dir(sys.argv[1])
+        set_data_dir(sys.argv[2])
+    elif len(sys.argv) != 1:
+        warn('usage: %s [feature_dir [data_dir]]')
+        sys.exit(1)
 
     inferrer = LogisticInferrer()
 

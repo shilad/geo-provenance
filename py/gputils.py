@@ -15,6 +15,10 @@ def get_feature_data_path(name):
 def get_data_path(filename):
     return DATA_DIR + '/' + filename
 
+def set_data_dir(path):
+    global DATA_DIR
+    DATA_DIR = path
+
 def set_feature_dir(path):
     global FEATURE_DIR
     FEATURE_DIR = path
