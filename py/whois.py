@@ -180,7 +180,6 @@ def extract_parsed_whois_country(records, countries, aliases):
 
     # First try to extract a parsed record
     result = pythonwhois.parse.parse_raw_whois(records)
-    import pprint; pprint.pprint(result)
     contact_countries = {}
     for (contact_type, contact_info) in result.get('contacts', {}).items():
         if not contact_info or not contact_info.get('country'): continue
