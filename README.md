@@ -42,7 +42,7 @@ You would see the following output:
 http://www.timeout.com/dublin/  gb      0.8259  {'gb' : 0.8259, 'us' : 0.0628, 'fr' : 0.0008, 'ca' : 0.0006, 'ru' : 0.0006, 'in' : 0.0005, 'de' : 0.0005, 'se' : 0.0005, 'it' : 0.0005, 'pl' : 0.0005}
 ```
 
-The program outputs the following fields: 
+run_inferrer.py outputs the following four tab-separated fields: 
 
 1. The URL itself.
 2. The most probable country.
@@ -62,7 +62,17 @@ $ python run_inferrer.py path/to/features/dir path/to/data/dir
 import gputils
 import gpinfer
 
+# necessary iff not run from the "py" directory
+gputils.set_data_dir('/path/to/data')
 
+# necessary iff not run from the "py" directory or alternate feature caches are used (see below)
+gputils.set_feature_dir('/path/to/feature')
+
+inferrer = gpinfer.LogisticInferrer()
+
+# conf is a number between 0 and 1.0 indicating confidence
+# dist is a dict with keys country codes and values predicted probability
+(conf, dist) = inferrer.infer('http://www.timeout.com/dublin/')
 ```
 
 ### Incorporating larger pre-built caches for speed
