@@ -85,9 +85,13 @@ This cache contains information about all 7.5M URLs analyzed in our CHI paper.
 
 The logistic regression classification model used in this package is trained using a gold standard dataset that maps urls to countries. This dataset is available in the [data](https://github.com/shilad/geo-provenance/blob/master/data/geoprov198.tsv) directory and its collection methodology is described in the citation above.
 
+### Questions or suggestions?
+
+Open an issue on this repo, send a pull request, or email Shilad at ssen@macalester.edu.
+
 ### Credits
 
 * Shilad Sen developed the geoprovenance inference algorithm and software.
 * Dave Musicant developed the original Ruby code to extract country names from whois queries.
 * Heather Ford led development of GeoProv198, with major assistance from Brent Hecht and minor assistance from Dave Musicant, Shilad Sen, and Mark Graham.
-* Matthew Zook provided some early guidance on the design of our algorithm.
+* Matthew Zook provided early guidance on the design of our algorithm.
