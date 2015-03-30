@@ -180,10 +180,11 @@ def extract_parsed_whois_country(records, countries, aliases):
 
     # First try to extract a parsed record
     result = pythonwhois.parse.parse_raw_whois(records)
+    import pprint; pprint.pprint(result)
     contact_countries = {}
     for (contact_type, contact_info) in result.get('contacts', {}).items():
         if not contact_info or not contact_info.get('country'): continue
-        country_code = normalize_country(contact_info['country'], countries, aliases)
+        country_code = normalize_country(contact_info['country'], aliases)
         if country_code: contact_countries[contact_type] = country_code
     if contact_countries:
         for type in ('admin', 'tech', 'registrant'):
@@ -196,12 +197,12 @@ def extract_parsed_whois_country(records, countries, aliases):
     for l in  [l for l in lines if ('admin' in l and 'country code' in l)]:
         tokens = l.split(':')
         if len(tokens) > 1:
-            cc = normalize_country(tokens[-1].strip(), countries, aliases)
+            cc = normalize_country(tokens[-1].strip(), aliases)
             if cc: return cc
     for l in  [l for l in lines if ('admin country' in l)]:
         tokens = l.split(':')
         if len(tokens) > 1:
-            cc = normalize_country(tokens[-1].strip(), countries, aliases)
+            cc = normalize_country(tokens[-1].strip(), aliases)
             if cc: return cc
 
     return None # Failure!
@@ -214,16 +215,14 @@ def extract_freetext_whois_country(records, regexes):
         if n > 0: dist[tld] = n
     return dist
 
-def normalize_country(raw, countries, aliases):
+def normalize_country(raw, aliases):
     raw = raw.strip().lower()
-    if len(raw) < 2: return None
-    if len(raw) == 2:
-        for c in countries:
-            if c.tld == raw:
-                return raw
-            elif c.name.lower() == raw:
-                return c.tld
-    return aliases.get(raw) # may be none
+    if raw in aliases:
+        return raw  # it's a literal TLD
+    for tld in aliases:
+        if raw in aliases[tld]:
+            return tld
+    return None
 
 def build_regexes(aliases):
     warn('building country alias regexes')
@@ -298,49 +297,137 @@ def test_freetext_whois():
     assert(freetext == {'us' : 3})
 
 
-def test_regex():
+def test_parsed():
     aliases = read_aliases()
-    regexes = build_regexes(aliases)
     records = [
         """
-%
-%AM TLD whois server #2
-%
+Whois Server Version 2.0
 
-   Domain name: tert.am
-   Registar:    abcdomain (ABCDomain LLC)
-   Status:      active
+Domain names in the .com and .net domains can now be registered
+with many different competing registrars. Go to http://www.internic.net
+for detailed information.
 
-   Registrant:
-      TERT AM LLC
-      Krivoy alley, home 22
-      Yerevan,  0015
-      AM
+   Domain Name: HARAREMUSIC.COM
+   Registrar: WEBFUSION LTD.
+   Sponsoring Registrar IANA ID: 1515
+   Whois Server: whois.123-reg.co.uk
+   Referral URL: http://www.123-reg.co.uk
+   Name Server: NS.123-REG.CO.UK
+   Name Server: NS2.123-REG.CO.UK
+   Status: ok http://www.icann.org/epp#OK
+   Updated Date: 23-oct-2014
+   Creation Date: 16-nov-2006
+   Expiration Date: 16-nov-2015
 
-   Administrative contact:
-      TERT AM LLC
-      Krivoy alley, home 22
-      Yerevan, 0015
-      AM
-      editor@tert.am
-      060528528, 096837826
+>>> Last update of whois database: Mon, 30 Mar 2015 16:51:09 GMT <<<
 
-   Technical contact:
-      TERT AM LLC
-      Krivoy alley, home 22
-      Yerevan, 0015
-      AM
-      sardaryan.h@gmail.com
-      060528528, 096837826
+NOTICE: The expiration date displayed in this record is the date the
+registrar's sponsorship of the domain name registration in the registry is
+currently set to expire. This date does not necessarily reflect the expiration
+date of the domain name registrant's agreement with the sponsoring
+registrar.  Users may consult the sponsoring registrar's Whois database to
+view the registrar's reported date of expiration for this registration.
 
-   DNS servers:
-      ivy.ns.cloudflare.com
-      nick.ns.cloudflare.com
+TERMS OF USE: You are not authorized to access or query our Whois
+database through the use of electronic processes that are high-volume and
+automated except as reasonably necessary to register domain names or
+modify existing registrations; the Data in VeriSign Global Registry
+Services' ("VeriSign") Whois database is provided by VeriSign for
+information purposes only, and to assist persons in obtaining information
+about or related to a domain name registration record. VeriSign does not
+guarantee its accuracy. By submitting a Whois query, you agree to abide
+by the following terms of use: You agree that you may use this Data only
+for lawful purposes and that under no circumstances will you use this Data
+to: (1) allow, enable, or otherwise support the transmission of mass
+unsolicited, commercial advertising or solicitations via e-mail, telephone,
+or facsimile; or (2) enable high volume, automated, electronic processes
+that apply to VeriSign (or its computer systems). The compilation,
+repackaging, dissemination or other use of this Data is expressly
+prohibited without the prior written consent of VeriSign. You agree not to
+use electronic processes that are automated and high-volume to access or
+query the Whois database except as reasonably necessary to register
+domain names or modify existing registrations. VeriSign reserves the right
+to restrict your access to the Whois database in its sole discretion to ensure
+operational stability.  VeriSign may restrict or terminate your access to the
+Whois database for failure to abide by these terms of use. VeriSign
+reserves the right to modify these terms at any time.
 
-   Registered:    2013-07-01
-   Last modified: 2015-01-28
-   Expires:       2016-07-01
+The Registry database contains ONLY .COM, .NET, .EDU domains and
+Registrars.
+
+For more information on Whois status codes, please visit
+https://www.icann.org/resources/pages/epp-status-codes-2014-06-16-en.
+Domain Name: HARAREMUSIC.COM
+Registry Domain ID: 673232892_DOMAIN_COM-VRSN
+Registrar WHOIS Server: whois.meshdigital.com
+Registrar URL: http://www.domainbox.com
+Updated Date: 2014-10-23T00:00:00Z
+Creation Date: 2006-11-16T00:00:00Z
+Registrar Registration Expiration Date: 2015-11-16T00:00:00Z
+Registrar: WEBFUSION LIMITED
+Registrar IANA ID: 1515
+Registrar Abuse Contact Email: support@domainbox.com
+Registrar Abuse Contact Phone: +1.8779770099
+Reseller: 123Reg/Webfusion
+Domain Status: ok
+Registry Registrant ID:
+Registrant Name: Kudaushe Matimba
+Registrant Organization:
+Registrant Street: 76 Purbrook Estate, Tower Bridge Road
+Registrant City: London
+Registrant State/Province: England
+Registrant Postal Code: SE1 3DA
+Registrant Country: GB
+Registrant Phone: +44.7939415405
+Registrant Phone Ext:
+Registrant Fax Ext:
+Registrant Email: kudaushe@gmail.com
+Registry Admin ID:
+Admin Name: Kudaushe Matimba
+Admin Organization:
+Admin Street: 76 Purbrook Estate, Tower Bridge Road
+Admin City: London
+Admin State/Province: England
+Admin Postal Code: SE1 3DA
+Admin Country: GB
+Admin Phone: +44.7939415405
+Admin Phone Ext:
+Admin Fax Ext:
+Admin Email: kudaushe@gmail.com
+Registry Tech ID:
+Tech Name: Webfusion Ltd.
+Tech Organization:
+Tech Street: 5 Roundwood Avenue
+Tech City: Stockley Park
+Tech State/Province: Uxbridge
+Tech Postal Code: UB11 1FF
+Tech Country: GB
+Tech Phone: +44.8454502310
+Tech Phone Ext:
+Tech Fax Ext:
+Tech Email: yoursupportrequest@123-reg.co.uk
+Name Server: ns.123-reg.co.uk
+Name Server: ns2.123-reg.co.uk
+DNSSEC: unsigned
+URL of the ICANN WHOIS Data Problem Reporting System: http://wdprs.internic.net/
+>>> Last update of WHOIS database: 2015-03-30T17:51:27Z <<<
+
+The Data in this WHOIS database is provided
+for information purposes only, and is designed to assist persons in
+obtaining information related to domain name registration records.
+It's accuracy is not guaranteed. By submitting a
+WHOIS query, you agree that you will use this Data only for lawful
+purposes and that, under no circumstances will you use this Data to:
+(1) allow, enable, or otherwise support the transmission of mass
+unsolicited, commercial advertising or solicitations via e-mail(spam);
+ or (2) enable high volume, automated, electronic processes that
+apply to this WHOIS or any of its related systems. The provider of
+this WHOIS reserves the right to modify these terms at any time.
+By submitting this query, you agree to abide by this policy.
+
+LACK OF A DOMAIN RECORD IN THE WHOIS DATABASE DOES
+NOT INDICATE DOMAIN AVAILABILITY.
         """
         ]
-    freetext = extract_freetext_whois_country(records, regexes)
-    assert(freetext == None)
+    freetext = extract_parsed_whois_country(records, read_countries(), aliases)
+    assert(freetext == 'gb')
