@@ -54,6 +54,9 @@ def guess_charset(response, download):
     return 'utf-8'
 
 
+TMP_DIR = ".tmp"
+
+
 def download_url(url):
     urlinfo = urlparse.urlparse(url)
 
@@ -67,8 +70,11 @@ def download_url(url):
     ]
     response = opener3.open(request, timeout=20.0)
 
+    if not os.path.isdir(TMP_DIR):
+        os.mkdir(TMP_DIR)
+
     # write a temporary file in the original encoding
-    tmp = tempfile.mktemp()
+    tmp = tempfile.mktemp(dir=TMP_DIR)
     f = open(tmp, 'wb')
     shutil.copyfileobj(response, f, BLOCKSIZE)
     ctype = response.headers.get('content-type', '').split(';')[0].strip()
@@ -77,7 +83,7 @@ def download_url(url):
 
     charset = guess_charset(response, tmp)
 
-    tmp2 = tempfile.mktemp()
+    tmp2 = tempfile.mktemp(dir=TMP_DIR)
     reencode(tmp, charset, tmp2, 'utf-8')
 
     f = gp_open(tmp2)
