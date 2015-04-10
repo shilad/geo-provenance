@@ -4,46 +4,120 @@ String.prototype.endsWith = function(suffix) {
     return this.indexOf(suffix, this.length - suffix.length) !== -1;
 };
 
-GP.getDomain = function(url) {
-    var parser = document.createElement('a');
-    return parser.hostname;
+GP.testUsingConsole = function(url) {
+    console.log('testing inferrence of url ' + url);
+    console.log('domain is ' + GP.getDomain(url));
+    console.log('registered domain is ' + GP.getRegisteredDomain(url));
+    GP.LogisticInferrer(url,
+            function (result) {
+                console.log('result', JSON.stringify(result));
+                if (result[0] == 'final') {
+                    var dist = result[1];
+                    var countries = Object.keys(dist).sort(function(a,b){return dist[b]-dist[a];})
+                    console.log('most likely countries:');
+                    for (var i = 0; i < countries.length && i < 10; i++) {
+                        var c = countries[i];
+                        var p = dist[c];
+                        console.log('\t' + c + ': ' + p);
+                    }
+                }
+            },
+            function (msg) { console.log('message', JSON.stringify(msg))},
+            function (err) { console.log('error', JSON.stringify(err))}
+        );
 };
 
-GP.getRegisteredDomain = function(url) {
+GP.LogisticInferrer = function (url, onResult, onMessage, onError) {
+    var inferrers = {
+        'tld' : GP.TLDInferrer,
+        'wikidata' : GP.WikiDataInferrer,
+        'ip' : GP.IPInferrer,
+        'whois' : GP.WhoIsInferrer,
+        'lang' : GP.PageLangInferrer,
+        'prior' : GP.PriorInferrer
+    };
+    var coefficients = {
+        'intercept' : -7.06,
+        'prior'     : 2.38,
+        'parsed'    : 5.39,
+        'freetext'  : 2.06,
+        'wikidata'  : 2.03,
+        'lang'      : 5.37,
+        'tld'       : 7.03
+    };
+
+    var logistic = function(x) { return 1.0 / (1.0 + Math.exp(-x)); };
+    var dists = {};
+
+    var receivedResult = function(name, result) {
+        dists[name] = result;
+        var need = Object.keys(inferrers).length;
+        var have = Object.keys(dists).length;
+        if (need != have) {
+            onMessage(['final', 'awaiting results from ' + (need-have) + ' more inferrer(s).']);
+            return; // awaiting more results from sub-inferrerrs!
+        }
+        onMessage(['final', 'recevied all inferrer results.']);
+
+        var results = {};
+        GP_COUNTRIES.forEach(function (c) { results[c.iso] = coefficients.intercept; })
+        for (var k in coefficients) {
+            if (!dists[k]) continue;
+            for (var c in dists[k]) {
+                if (!results[c]) continue;
+                results[c] += dists[k][c] * coefficients[k];
+            }
+        }
+        var sum = 0.0;
+        for (var c in results) {
+            var p = logistic(results[c]);
+            p = Math.pow(p, 1.2);   // to calibrate probabilities
+            results[c] = p;
+            sum += p;
+        }
+
+        for (var c in results) {
+            results[c] /= sum;
+        }
+        onResult(['final', results]);
+    };
+
+    $.each(inferrers, function (name, fn) {
+        fn(
+            url,
+            function (result) { onResult([name, result]); receivedResult(name, result); },
+            function (msg) { onMessage([name, msg]); },
+            function (err) { onError([name, err]); receivedResult(name, {}); }
+        );
+    });
+
+};
+
+GP.PriorInferrer = function (url, onResult, onMessage, onError) {
+    var dist = {};
+    GP_COUNTRIES.forEach(function (c) { dist[c.tld] = c.prior; });
+    onResult(dist);
+};
+
+GP.TLDInferrer = function (url, onResult, onMessage, onError) {
     var domain = GP.getDomain(url);
-    return RegDomain.getRegisteredDomain(domain).toLowerCase();
-};
-
-GP.MilGovInferrer = function (url, onResult, onMessage, onError) {
-    var domain = GP.getDomain(url);
-    var isMilGov = domain.endsWith('.mil') || domain.endsWith('.gov');
-    onMessage('Checking if it is a US military or government domain: ' + isMilGov);
-    onResult(isMilGov ? {us: 1.0} : {});
-};
-
-GP.countryToDist = function (country) {
-    country = country.toLowerCase();
     var iso = null;
-    if (country.length < 2) {
-        // invalid
-    } else if (country.length == 2) {
-        iso = country;
-    } else if (country in GP_ALIASES) {
-        iso = GP_ALIASES[country];
-    }
-    if (iso) {
-        var dist = {};
-        dist[iso] = 1.0;
-        return dist;
+    if (domain.endsWith('.mil') || domain.endsWith('.gov')) {
+        onMessage('tld corresponds to US military or government domain.');
+        iso = 'us';
     } else {
-        return {};
+        GP_COUNTRIES.forEach(function (c) {
+            if (domain.endsWith('.' + c.tld)) {
+                iso = c.iso;
+            }
+        });
     }
+    onResult(GP.countryToDist(iso));
 };
 
 GP.WikiDataInferrer = function (url, onResult, onMessage, onError) {
     var domain = GP.getRegisteredDomain(url);
     var coords = GP_WIKIDATA_COORDS[domain];
-    onMessage('Checking for wikidata organization coordinates: ' + (!!coords));
     if (coords) {
         onMessage('Geocoding country for wikidata organization coordinates (' + coords + ')...');
         var tokens = coords.split(',');
@@ -57,13 +131,14 @@ GP.WikiDataInferrer = function (url, onResult, onMessage, onError) {
                     onResult(GP.countryToDist(data.address.country_code));
                 } else {
                     onError('Unexpected wikidata geocoding response: ' + data);
-                    onResult({});
                 }
             }
         ).fail(function (msg) {
                 onError('Wikidata geocoding failed: ' + msg);
-                onResult({});
             });
+    } else {
+        onMessage('No wikidata coordinates found for url');
+        onResult({});
     }
 };
 
@@ -79,12 +154,10 @@ GP.IPInferrer = function (url, onResult, onMessage, onError) {
                 onResult(GP.countryToDist(data.country_code));
             } else {
                 onError('Unexpected server geocoding response: ' + data);
-                onResult({});
             }
         }
     ).fail(function (msg) {
             onError('Wikidata geocoding failed: ' + msg);
-            onResult({});
         });
 };
 
@@ -168,7 +241,6 @@ GP.WhoIsInferrer = function (url, onResult, onMessage, onError) {
         }
     }).fail(function (msg) {
         onError('Whois lookup failed: ' + msg);
-        onResult({});
     });
 
 };
@@ -201,30 +273,65 @@ GP.PageLangInferrer = function (url, onResult, onMessage, onError) {
 
     var xhr = createCORSRequest('GET', yql_url);
     if (!xhr) {
-        onError('CORS not supported');
-        return onResult({});
+        return onError('CORS not supported');
     }
     xhr.onload = function() {
         var responseText = xhr.responseText;
-        var stripped = responseText.replace(/(<([^>]+)>)/ig,"");
+        var stripped = responseText.replace(/(<([^>]+)>)/ig,"").replace(/  +/g, ' ');
         guessLanguage.detect(stripped, function(language) {
-            var dist = {};
             if (!language) {
-                onError("No language inferred for URL.");
-            } else if (!GP_LANG_TO_COUNTRY[language.toLowerCase()]) {
-                onError("Unknown language inferred for URL: " + language);
+                return onError("No language inferred for URL.");
             } else {
-                GP_LANG_TO_COUNTRY
+                onMessage("Inferred language " + language);
+                if (!GP_LANG_TO_COUNTRY[language.toLowerCase()]) {
+                    return onError("Unknown language inferred for URL: " + language);
+                } else {
+                    var dist = {};
+                    GP_LANG_TO_COUNTRY[language.toLowerCase()].forEach(function (pair) {
+                        var iso = pair[0];
+                        var prob = pair[1];
+                        dist[iso] = prob;
+                    });
+                    return onResult(dist);
+                }
             }
-            var countries = GP_LANG_TO_COUNTRY[language.toLower]
-            return onResult(GP.countryToDist(language));
         });
     };
     xhr.onerror = function() {
         return onError('An error occurred when retrieving the html of ' + url);
     };
-    onMessage('retriving html for ' + url);
+    onMessage('retriving html to detect language of url ' + url);
     xhr.send();
+};
+
+GP.getDomain = function(url) {
+    var parser = document.createElement('a');
+    parser.href = url;
+    return parser.hostname;
+};
+
+GP.getRegisteredDomain = function(url) {
+    var domain = GP.getDomain(url);
+    return RegDomain.getRegisteredDomain(domain).toLowerCase();
+};
+
+GP.countryToDist = function (country) {
+    country = (!country) ? '' : country.toLowerCase();
+    var iso = null;
+    if (country.length < 2) {
+        // invalid
+    } else if (country.length == 2) {
+        iso = country;
+    } else if (country in GP_ALIASES) {
+        iso = GP_ALIASES[country];
+    }
+    if (iso) {
+        var dist = {};
+        dist[iso] = 1.0;
+        return dist;
+    } else {
+        return {};
+    }
 };
 
 /**

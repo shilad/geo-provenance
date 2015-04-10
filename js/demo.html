@@ -31,18 +31,20 @@
 <script src="regdomain.js"></script>
 <script src="alias_data.js"></script>
 <script src="country_data.js"></script>
+<script src="lang_data.js"></script>
 <script src="wikidata_data.js"></script>
 <script src="gpinfer.js"></script>
 <script src="_languageData.js"></script>
 <script src="guessLanguage.js"></script>
 <script>
     $(window).ready(function() {
-        gpinfer(
-                'http://unrwa.org/ar/where-we-work',
-                function (message) {
-                    var res = $("#results");
-                    res.html(res.html() + message + '\n')
-                });
+        GP.testUsingConsole('http://unrwa.org/ar/where-we-work');
+//        gpinfer(
+//                'http://unrwa.org/ar/where-we-work',
+//                function (message) {
+//                    var res = $("#results");
+//                    res.html(res.html() + message + '\n')
+//                });
     });
 </script>
 
