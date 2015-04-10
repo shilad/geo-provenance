@@ -1,0 +1,50 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>The HTML5 Herald</title>
+    <meta name="description" content="The HTML5 Herald">
+    <meta name="author" content="SitePoint">
+
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+    <link rel="stylesheet" href="demo.css">
+
+    <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<h1>GeoProvenance Inference Demonstration</h1>
+<p>
+    <label>Enter URL:</label><input type="text" name="url" maxlength="100"></td></tr>
+</p>
+
+<pre id="results">
+
+</pre>
+
+<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+<script src="regdomain.js"></script>
+<script src="alias_data.js"></script>
+<script src="country_data.js"></script>
+<script src="wikidata_data.js"></script>
+<script src="gpinfer.js"></script>
+<script src="_languageData.js"></script>
+<script src="guessLanguage.js"></script>
+<script>
+    $(window).ready(function() {
+        gpinfer(
+                'http://unrwa.org/ar/where-we-work',
+                function (message) {
+                    var res = $("#results");
+                    res.html(res.html() + message + '\n')
+                });
+    });
+</script>
+
+</body>
+</html>

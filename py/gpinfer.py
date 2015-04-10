@@ -1,3 +1,5 @@
+#!/usr/bin/python -O
+
 import collections
 import math
 
