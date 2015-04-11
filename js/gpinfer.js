@@ -4,6 +4,11 @@ String.prototype.endsWith = function(suffix) {
     return this.indexOf(suffix, this.length - suffix.length) !== -1;
 };
 
+GP.basedir = "";
+GP.init = function() {
+
+};
+
 GP.testUsingConsole = function(url) {
     console.log('testing inferrence of url ' + url);
     console.log('domain is ' + GP.getDomain(url));

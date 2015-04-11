@@ -1,0 +1,68 @@
+
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+
+
+.map-container {
+   height: 280px;
+}
+
+.output {
+   font-size: 11px;
+}
+
+div.alg p {
+   height: 50px;
+   color: #777;
+}
+
+.alg-final h2 {
+   margin: 0 0 10px 0 !important;
+   height: 35px !important;
+}
+
+.alg-final p {
+   height: 20px !important;
+}
+
+.alg-final pre {
+   height: 205px !important;
+}
+
+div.alg pre {
+   height: auto;
+   height: 100px;
+   overflow: auto;
+   background-color: #eeeeee;
+   word-break: normal !important;
+   word-wrap: normal !important;
+   white-space: pre !important;
+}
+
+div.alg pre span.results {
+   color: #3e913e;
+}
+
+div.alg pre span.error {
+   color: #913e3e;
+}
+
+div.queryform {
+   margin-top: 20px;
+}
+
+.row.mainrow {
+   margin-top: 30px;
+}
+
+
+
+
+
+
+
+
+

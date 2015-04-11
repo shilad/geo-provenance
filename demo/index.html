@@ -1,0 +1,195 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang=""> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <style>
+        </style>
+        <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="js/vendor/jquery-jvectormap-2.0.2.css">
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
+    </head>
+    <body>
+        <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="container">
+
+        <div class="row">
+            <h1 class="col-md-12">Geoprovenance Inference Algorithm</h1>
+            <div class="col-md-8 queryform">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="http://www.bbc.com/news/world-latin-america-32261550">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button">Go!</button>
+                    </span>
+                </div><!-- /input-group -->
+            </div>
+            <div class="col-md-offset-1 col-md-3">try: <a href="#">http://www.shilad.com</a></div>
+        </div>
+
+      <div class="row mainrow">
+          <div class="map-container col-md-6">
+          </div>
+
+          <div class="col-md-6 alg alg-final">
+              <h2>Main algorithm:&nbsp;&nbsp;<small class="text-right">(91% accuracy)</small></h2>
+              <p>Combines the six other signals of geoprovenance on this page.</p>
+          <pre class="output">
+              </pre>
+          </div>
+
+      </div>
+      </div>
+
+    <div class="container">
+      <!-- Example row of columns -->
+        <div class="row">
+            <h2 class="col-md-12">Component algorithms:</h2>
+            <div class="col-md-4 alg alg-wikidata">
+                <h4>Wikidata algorithm:&nbsp;&nbsp;<small class="text-right">(93% accuracy)</small></h4>
+                <p>Looks up the headquarters country for organizations present in <a href="https://www.wikidata.org/wiki/Q1141571">Wikidata</a>.</p>
+                <pre class="output"></pre>
+            </div>
+            <div class="col-md-4 alg alg-tld">
+                <h4>TLD algorithm:&nbsp;&nbsp;<small class="text-right">(98% accuracy)</small></h4>
+                <p>Identifies the country top-level-domain for associated URLs such as .uk, .de, and .cn.</p>
+                <pre class="output"></pre>
+            </div>
+            <div class="col-md-4 alg alg-ip">
+                <h4>GeoIP algorithm:&nbsp;&nbsp;<small class="text-right">(45% accuracy)</small></h4>
+                <p>Geocodes the web server's IP address.</p>
+                <pre class="output"></pre>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-md-4 alg alg-whois">
+                <h4>WhoIs algorithm:&nbsp;&nbsp;<small class="text-right">(80% accuracy)</small></h4>
+                <p>Performs a <a href="https://en.wikipedia.org/wiki/Whois">WhoIs query</a> to obtain the contact's address for the registered domain.</p>
+                <pre class="output"></pre>
+            </div>
+            <div class="col-md-4 alg alg-prior">
+                <h4>Language algorithm:&nbsp;&nbsp;<small class="text-right">(61% accuracy)</small></h4>
+                <p>Detects the language of the webpage and looks up the countries most likely to speak it.</p>
+                <pre class="output"></pre>
+            </div>
+            <div class="col-md-4 alg alg-prior">
+                <h4>Prior algorithm:&nbsp;&nbsp;<small class="text-right">(30% accuracy)</small></h4>
+                <p>Represents the overall likelihood of a country to produce sources.</p>
+                <pre class="output"></pre>
+            </div>
+
+        </div>
+
+      <hr>
+
+      <footer>
+        <p>&copy; Company 2015</p>
+      </footer>
+    </div> <!-- /container -->        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-2.1.3.min.js"><\/script>')</script>
+
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <script src="js/vendor/jquery-jvectormap-2.0.2.min.js"></script>
+        <script src="js/vendor/jquery-jvectormap-world-mill-en.js"></script>
+        <script src="js/vendor/jquery.scrollTo.min.js"></script>
+
+        <script src="js/main.js"></script>
+
+        <script src="../js/regdomain.js"></script>
+        <script src="../js/alias_data.js"></script>
+        <script src="../js/country_data.js"></script>
+        <script src="../js/lang_data.js"></script>
+        <script src="../js/wikidata_data.js"></script>
+        <script src="../js/gpinfer.js"></script>
+        <script src="../js/_languageData.js"></script>
+        <script src="../js/guessLanguage.js"></script>
+
+        <script>
+            var onResults = function(results) {
+                var name = results[0];
+                var dist = results[1];
+                var newText = '';
+
+                if (!dist || Object.keys(dist).length == 0) {
+                    newText = '<span class=error>No results found</span>\n';
+                } else {
+                    var countries = Object.keys(dist).sort(function(a,b){return dist[b]-dist[a];})
+                    newText += '<span class=results>most likely countries:</span>\n';
+                    for (var i = 0; i < countries.length && i < 5; i++) {
+                        var c = countries[i];
+                        var p = dist[c];
+                        newText += ('<span class=results>' + c + ': ' + p + '</span>\n');
+                    }
+                }
+
+                var pre = $(".alg-" + name + " pre");
+                pre.html(pre.html() + newText);
+                pre.scrollTo('100%');
+            };
+
+            var onError = function(results) {
+                var name = results[0];
+                var result = results[1];
+                var pre = $(".alg-" + name + " pre");
+                pre.html(pre.html() + '<span class=error>' + result + '</span>\n');
+                pre.scrollTo('100%');
+            };
+
+            var onMessage = function(results) {
+                var name = results[0];
+                var result = results[1];
+                var pre = $(".alg-" + name + " pre");
+                pre.html(pre.html() + result + '\n');
+                pre.scrollTo('100%');
+            };
+
+            $().ready(function () {
+                $.extend($.scrollTo.defaults, { axis: 'y' });
+                $('.map-container').vectorMap({map: 'world_mill_en'});
+                var url = 'http://unrwa.org/ar/where-we-work';
+                $(".alg pre").html('');
+                onMessage(['final','testing inferrence of url ' + url]);
+                onMessage(['final','domain is ' + GP.getDomain(url)]);
+                onMessage(['final', 'registered domain is ' + GP.getRegisteredDomain(url)]);
+                GP.LogisticInferrer(url, onResults, onMessage, onError);
+            });
+
+            //            $(window).ready(function() {
+//                GP.testUsingConsole('http://unrwa.org/ar/where-we-work');
+//        gpinfer(
+//                'http://unrwa.org/ar/where-we-work',
+//                function (message) {
+//                    var res = $("#results");
+//                    res.html(res.html() + message + '\n')
+//                });
+//            });
+        </script>
+
+
+
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='//www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-XXXXX-X','auto');ga('send','pageview');
+        </script>
+    </body>
+</html>
