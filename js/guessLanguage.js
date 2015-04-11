@@ -611,7 +611,6 @@
       return {
         detect: function(text, callback) {
           // Return the ISO 639-2 language identifier, i.e. 'en'.
-
           if (!text) {
             callback.apply(undefined, [UNKNOWN]);
             return;

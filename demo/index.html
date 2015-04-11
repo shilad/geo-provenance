@@ -25,20 +25,80 @@
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
+
+        <div class="loading-dialog" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Loading data files...</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="progress">
+                            <div caption="languages" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 10em;">
+                                languages 0%
+                            </div>
+                        </div>
+                        <div class="progress">
+                            <div caption="wikidata" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 10em;">
+                                wikidata 0%
+                            </div>
+                        </div>
+                        <div class="progress">
+                            <div caption="country aliases" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 10em;">
+                                country aliases 0%
+                            </div>
+                        </div>
+                        <div class="progress">
+                            <div caption="country info" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="min-width: 10em;">
+                                country info 0%
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+
+
     <!-- Main jumbotron for a primary marketing message or call to action -->
       <div class="container">
 
-        <div class="row">
-            <h1 class="col-md-12">Geoprovenance Inference Algorithm</h1>
-            <div class="col-md-8 queryform">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="http://www.bbc.com/news/world-latin-america-32261550">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button">Go!</button>
-                    </span>
-                </div><!-- /input-group -->
+          <div class="row">
+              <h1 class="col-md-12">Geoprovenance Inference Algorithm</h1>
+            <p class="col-md-12">
+                This page demonstates the <b>geoprovenance inference algorithm</b> introduced in
+                <em>Shilad Sen, Heather Ford, Dave Musicant, Mark Graham, Oliver Keyes, and Brent Hecht. 2015. <a href="http://www-users.cs.umn.edu/~bhecht/publications/localnessgeography_CHI2015.pdf">Barriers to the Localness of Volunteered Geographic Information.</a> Proceedings of CHI 2015. New York: ACM Press.</em>
+            </p>
+            <p class="col-md-12">
+                Given a URL, the algorithm infers the home country of the original publisher of the informational content of the web resource at that URL.
+                The overall algorithm (to the right of the map), combines six signals of geoprovenance to achieve 91% accuracy.
+                Details can be found in our paper and the Python and Javascript reference
+                implementations available at the <a href="https://github.com/shilad/geo-provenance/">Geo-Provenance GitHub repository</a>.
+            </p>
+            <div class="col-md-7">
+                <p>
+                    Enter a URL below or click a suggested URL on the right to see our algorithm in action.
+                </p>
+
+                <div class="queryform">
+                    <div class="input-group">
+                        <form>
+                        <input type="text" class="form-control" placeholder="http://www.bbc.com/news/world-latin-america-32261550">
+                        </form>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button">Go!</button>
+                        </span>
+                    </div><!-- /input-group -->
+                </div>
             </div>
-            <div class="col-md-offset-1 col-md-3">try: <a href="#">http://www.shilad.com</a></div>
+            <div class="col-md-5 try">
+                <h6>Try these URLs:</h6>
+                <ul class="try">
+                    <li><a href="#" class="example">http://d-nb.info/gnd/10001229-2</a></li>
+                    <li><a href="#" class="example">http://www.bouchard-pereetfils.com/en/village.html</a></li>
+                    <li><a href="#" class="example">http://www.inmediahk.net/node/1003132</a></li>
+                </ul>
+            </div>
         </div>
 
       <div class="row mainrow">
@@ -59,6 +119,23 @@
       <!-- Example row of columns -->
         <div class="row">
             <h2 class="col-md-12">Component algorithms:</h2>
+            <div class="row">
+                <div class="col-md-4 alg alg-lang">
+                    <h4>Language algorithm:&nbsp;&nbsp;<small class="text-right">(61% accuracy)</small></h4>
+                    <p>Detects the language of the webpage and looks up the countries most likely to speak it.</p>
+                    <pre class="output"></pre>
+                </div>
+                <div class="col-md-4 alg alg-whois">
+                    <h4>WhoIs algorithm:&nbsp;&nbsp;<small class="text-right">(80% accuracy)</small></h4>
+                    <p>Performs a <a href="https://en.wikipedia.org/wiki/Whois">WhoIs query</a> to obtain the contact's address for the registered domain.</p>
+                    <pre class="output"></pre>
+                </div>
+                <div class="col-md-4 alg alg-prior">
+                    <h4>Prior algorithm:&nbsp;&nbsp;<small class="text-right">(30% accuracy)</small></h4>
+                    <p>Represents the overall likelihood of a country to produce sources.</p>
+                    <pre class="output"></pre>
+                </div>
+            </div>
             <div class="col-md-4 alg alg-wikidata">
                 <h4>Wikidata algorithm:&nbsp;&nbsp;<small class="text-right">(93% accuracy)</small></h4>
                 <p>Looks up the headquarters country for organizations present in <a href="https://www.wikidata.org/wiki/Q1141571">Wikidata</a>.</p>
@@ -76,29 +153,11 @@
             </div>
 
         </div>
-        <div class="row">
-            <div class="col-md-4 alg alg-whois">
-                <h4>WhoIs algorithm:&nbsp;&nbsp;<small class="text-right">(80% accuracy)</small></h4>
-                <p>Performs a <a href="https://en.wikipedia.org/wiki/Whois">WhoIs query</a> to obtain the contact's address for the registered domain.</p>
-                <pre class="output"></pre>
-            </div>
-            <div class="col-md-4 alg alg-prior">
-                <h4>Language algorithm:&nbsp;&nbsp;<small class="text-right">(61% accuracy)</small></h4>
-                <p>Detects the language of the webpage and looks up the countries most likely to speak it.</p>
-                <pre class="output"></pre>
-            </div>
-            <div class="col-md-4 alg alg-prior">
-                <h4>Prior algorithm:&nbsp;&nbsp;<small class="text-right">(30% accuracy)</small></h4>
-                <p>Represents the overall likelihood of a country to produce sources.</p>
-                <pre class="output"></pre>
-            </div>
-
-        </div>
 
       <hr>
 
       <footer>
-        <p>&copy; Company 2015</p>
+        <p>For questions, contact <a href="http://shilad.com">Shilad Sen</a></p>
       </footer>
     </div> <!-- /container -->        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-2.1.3.min.js"><\/script>')</script>
@@ -107,6 +166,7 @@
         <script src="js/vendor/jquery-jvectormap-2.0.2.min.js"></script>
         <script src="js/vendor/jquery-jvectormap-world-mill-en.js"></script>
         <script src="js/vendor/jquery.scrollTo.min.js"></script>
+        <script src="js/vendor/jquery.color-2.1.2.min.js"></script>
 
         <script src="js/main.js"></script>
 
@@ -120,10 +180,16 @@
         <script src="../js/guessLanguage.js"></script>
 
         <script>
+            var algDists = {};
             var onResults = function(results) {
                 var name = results[0];
                 var dist = results[1];
                 var newText = '';
+                if (dist.length) {
+                    dist = dist[1];
+                }
+
+                algDists[name] = dist;
 
                 if (!dist || Object.keys(dist).length == 0) {
                     newText = '<span class=error>No results found</span>\n';
@@ -140,6 +206,41 @@
                 var pre = $(".alg-" + name + " pre");
                 pre.html(pre.html() + newText);
                 pre.scrollTo('100%');
+
+                showMap(name);
+            };
+
+            var showMap = function(name) {
+                $('div.alg').each(function (i, div) {
+                    div = $(div);
+                    var color = $.Color(div.css('border-color'));
+                    var newColor = color.alpha(div.hasClass('alg-' + name) ? 1.0 : 0.0);
+                    if (color != newColor) {
+                        div.animate({'border-color' : newColor.toRgbaString()}, 200);
+                    }
+                });
+
+                var color = $.Color($('div.alg-' + name).css('border-color'));
+
+                var dist = algDists[name] || {};
+                var values = {};
+                for (var c in dist) {
+                    if (c == 'uk') c = 'gb';
+                    values[c.toUpperCase()] = dist[c];
+                }
+                var config = {
+                    map: 'world_mill_en',
+                    series: {
+                        regions: [{
+                            min: 0.0,
+                            max: 1.0,
+                            values: values,
+                            scale: ['#FFFFFF', color.toHexString()],
+                            normalizeFunction: 'polynomial'
+                        }]
+                    }
+                };
+                $('.map-container').empty().vectorMap(config);
             };
 
             var onError = function(results) {
@@ -159,25 +260,61 @@
             };
 
             $().ready(function () {
-                $.extend($.scrollTo.defaults, { axis: 'y' });
                 $('.map-container').vectorMap({map: 'world_mill_en'});
-                var url = 'http://unrwa.org/ar/where-we-work';
-                $(".alg pre").html('');
-                onMessage(['final','testing inferrence of url ' + url]);
-                onMessage(['final','domain is ' + GP.getDomain(url)]);
-                onMessage(['final', 'registered domain is ' + GP.getRegisteredDomain(url)]);
-                GP.LogisticInferrer(url, onResults, onMessage, onError);
+                $(".loading-dialog").modal({'show' : 'true', 'backdrop' : 'static' });
+                GP.init(
+                        '../js',
+                        function (caption, percent) {
+                            var bar = $(".progress-bar[caption='" + caption + "']");
+                            bar.width(percent + '%');
+                            bar.text(caption + ': ' + (percent|0) + '%');
+                        },
+                        function () {
+                            $(".loading-dialog").modal('hide');
+                            pageInit();
+                        }
+                );
             });
 
-            //            $(window).ready(function() {
-//                GP.testUsingConsole('http://unrwa.org/ar/where-we-work');
-//        gpinfer(
-//                'http://unrwa.org/ar/where-we-work',
-//                function (message) {
-//                    var res = $("#results");
-//                    res.html(res.html() + message + '\n')
-//                });
-//            });
+            var pageInit = function () {
+                $.extend($.scrollTo.defaults, { axis: 'y' });
+                $("a.example").click(function () {
+                    var form = $(".queryform form");
+                    var url = $(this).text().trim();
+                    form.find("input").val(url);
+                    form.submit();
+                   return false;
+                });
+                $("form").submit(function () {
+                    $(".alg pre").html('');
+                    var url = $(this).find("input").val().trim();
+                    onMessage(['final','testing inferrence of url ' + url]);
+                    onMessage(['final','domain is ' + GP.getDomain(url)]);
+                    onMessage(['final', 'registered domain is ' + GP.getRegisteredDomain(url)]);
+                    GP.LogisticInferrer(url, onResults, onMessage, onError);
+                    return false;
+                });
+
+                $(".alg")
+                        .mouseenter(function () {
+                            if (GP.mouseleavetimer) {
+                                clearTimeout(GP.mouseleavetimer);
+                            }
+                            GP.mouseleavetimer = null;
+                            var classes = $(this).attr('class').split(' ');
+                            classes.forEach( function (c) {
+                                if (c.substring(0, 4) == 'alg-') {
+                                    showMap(c.substring(4));
+                                }
+                            });
+                        }).mouseleave(function () {
+                            GP.mouseleavetimer = setTimeout(
+                                    function () {
+                                        showMap('final');
+                                        GP.mouseleavetimer = null;
+                                    }, 200);
+                        });
+            };
         </script>
 
 

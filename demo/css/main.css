@@ -32,6 +32,32 @@ div.alg p {
    height: 205px !important;
 }
 
+div.alg {
+   border: solid 2px #aaa;
+   border-radius: 5px;
+}
+div.alg.alg-final {
+   border-color: rgba(41, 128, 185, 0.0);
+}
+div.alg.alg-prior {
+   border-color: rgba(192, 57, 43, 0.0);
+}
+div.alg.alg-lang {
+   border-color: rgba(39, 174, 96, 0.0);
+}
+div.alg.alg-whois {
+   border-color: rgba(211, 84, 0, 0.0);
+}
+div.alg.alg-ip {
+   border-color: rgba(230, 126, 34, 0.0);
+}
+div.alg.alg-tld {
+   border-color: rgba(142, 68, 173, 0.0);
+}
+div.alg.alg-wikidata {
+   border-color: rgba(241, 196, 15, 0.0);
+}
+
 div.alg pre {
    height: auto;
    height: 100px;
@@ -46,6 +72,12 @@ div.alg pre span.results {
    color: #3e913e;
 }
 
+.loading-dialog {
+   position: absolute;;
+   height: 100%;
+   width: 100%;
+   z-index: 1000;
+}
 div.alg pre span.error {
    color: #913e3e;
 }
@@ -56,6 +88,24 @@ div.queryform {
 
 .row.mainrow {
    margin-top: 30px;
+}
+
+table.try td:first-child {
+   width: 40px;
+}
+
+div.try h6 {
+   margin: 0 0 5px 0;
+   padding: 0
+}
+
+div.try {
+   margin-left: 20px;
+   width: 200px;
+   font-size: 12px;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+   color: #333;
 }
 
 

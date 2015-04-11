@@ -5,8 +5,55 @@ String.prototype.endsWith = function(suffix) {
 };
 
 GP.basedir = "";
-GP.init = function() {
+GP.init = function(dataDir, percentCallback, onComplete) {
+    var files = [
+        [dataDir + '/lang_data.js', 'languages'],
+        [dataDir + '/wikidata_data.js', 'wikidata'],
+        [dataDir + '/alias_data.js', 'country aliases'],
+        [dataDir + '/country_data.js', 'country info']
+    ];
+    var completed = {};
+    var callbackWrapper = function(caption, percent) {
+        percentCallback(caption, percent);
+        if (percent == 100.0 && !completed[caption]) {
+            completed[caption] = true;
+            if (Object.keys(completed).length == files.length) {
+                onComplete();
+            }
+        }
+    };
+    files.forEach(function (pair) {
+        var file = pair[0];
+        var caption = pair[1];
+        GP.loadFile(file, callbackWrapper, caption);
+    });
+};
 
+GP.loadFile = function(url, callback, caption) {
+    callback(caption, 0.0);
+    url += '?' + Math.random();
+    $.ajax({
+        xhr: function()
+        {
+            var xhr = new window.XMLHttpRequest();
+            //Download progress
+            xhr.addEventListener("progress", function(evt){
+                if (evt.lengthComputable) {
+                    callback(caption, 100.0 * evt.loaded / evt.total);
+                }
+            }, false);
+            return xhr;
+        },
+        type: 'GET',
+        url: url,
+        datatype : 'script',
+        data: {}
+    }).done(function () {
+        callback(caption, 100.0)
+    }).fail(function (err) {
+        alert('loading of ' + url + ' failed: ' + err);
+        callback(caption, 0.0);
+    });
 };
 
 GP.testUsingConsole = function(url) {
@@ -55,7 +102,12 @@ GP.LogisticInferrer = function (url, onResult, onMessage, onError) {
     var dists = {};
 
     var receivedResult = function(name, result) {
-        dists[name] = result;
+        if (result.length) {
+            console.log('here ' + result[0]);
+            dists[result[0]] = result[1];
+        } else {
+            dists[name] = result;
+        }
         var need = Object.keys(inferrers).length;
         var have = Object.keys(dists).length;
         if (need != have) {
@@ -173,8 +225,8 @@ GP.WhoIsInferrer = function (url, onResult, onMessage, onError) {
     };
 
     onMessage('Queuing whois query for ' + domain);
-
-    return onResult(['freetext', { us : 1.0 }]);
+    //
+    //return onResult(['freetext', { us : 1.0 }]);
 
     $.ajax({
         method: "GET",
