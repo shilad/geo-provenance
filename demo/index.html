@@ -66,8 +66,10 @@
           <div class="row">
               <h1 class="col-md-12">Geoprovenance Inference Algorithm</h1>
             <p class="col-md-12">
-                This page showcases an algorithm to infer the primary publisher country for a web page.
-                This <b>geoprovenance inference algorithm</b> was introduced in:
+                This page guesses the country that is primarily responsible for the information on a web page using a
+                <b>geoprovenance inference algorithm</b> introduced in:
+            </p>
+            <p class="col-md-12">
                 <em>Shilad Sen, Heather Ford, Dave Musicant, Mark Graham, Oliver Keyes, and Brent Hecht. 2015. <a href="http://www-users.cs.umn.edu/~bhecht/publications/localnessgeography_CHI2015.pdf">Barriers to the Localness of Volunteered Geographic Information.</a> Proceedings of CHI 2015. New York: ACM Press.</em>
             </p>
             <p class="col-md-12">
@@ -240,7 +242,7 @@
                         }]
                     },
                     onRegionTipShow: function(e, el, code){
-                        el.html(el.html()+' (GDP - '+values[code]+')');
+                        el.html(el.html()+' ('+ (100 * values[code]).toFixed(2) +'%)');
                     }
                 };
                 $('.map-container').empty().vectorMap(config);
