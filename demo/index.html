@@ -66,15 +66,14 @@
           <div class="row">
               <h1 class="col-md-12">Geoprovenance Inference Algorithm</h1>
             <p class="col-md-12">
-                This page demonstates the <b>geoprovenance inference algorithm</b> introduced in
+                This page showcases an algorithm to infer the primary publisher country for a web page.
+                This <b>geoprovenance inference algorithm</b> was introduced in:
                 <em>Shilad Sen, Heather Ford, Dave Musicant, Mark Graham, Oliver Keyes, and Brent Hecht. 2015. <a href="http://www-users.cs.umn.edu/~bhecht/publications/localnessgeography_CHI2015.pdf">Barriers to the Localness of Volunteered Geographic Information.</a> Proceedings of CHI 2015. New York: ACM Press.</em>
             </p>
             <p class="col-md-12">
-                Given a URL, the algorithm infers the home country of the original publisher of the informational content of the web resource at that URL.
-                The overall algorithm (to the right of the map), combines six signals of geoprovenance to achieve 91% accuracy.
-                Details can be found in our paper and the Python and Javascript reference
-                implementations available at the <a href="https://github.com/shilad/geo-provenance/">Geo-Provenance GitHub repository</a>.
-                Note that this page shows a simplified algorithm that has slightly lower accuracy than the version in the paper.
+                Given a URL, the overall algorithm (to the right of the map), combines six different methods and achieves 91% accuracy.
+                Details can be found in our paper, and reference implementations in Python and Javascript are available in our <a href="https://github.com/shilad/geo-provenance/">GitHub Repo</a>.
+                Note that this page shows a simplified algorithm with lower accuracy than the version in our paper.
             </p>
             <div class="col-md-7">
                 <p>
@@ -108,7 +107,7 @@
 
           <div class="col-md-6 alg alg-final">
               <h2>Main algorithm:&nbsp;&nbsp;<small class="text-right">(91% accuracy)</small></h2>
-              <p>Combines the six other signals of geoprovenance on this page.</p>
+              <p>Combines the six other methods shown on this page.</p>
           <pre class="output">
               </pre>
           </div>
@@ -123,12 +122,12 @@
             <div class="row">
                 <div class="col-md-4 alg alg-lang">
                     <h4>Language algorithm:&nbsp;&nbsp;<small class="text-right">(61% accuracy)</small></h4>
-                    <p>Detects the language of the webpage and looks up the countries most likely to speak it.</p>
+                    <p>Detects the language of a webpage and looks up the countries most likely to speak the language.</p>
                     <pre class="output"></pre>
                 </div>
                 <div class="col-md-4 alg alg-whois">
                     <h4>WhoIs algorithm:&nbsp;&nbsp;<small class="text-right">(80% accuracy)</small></h4>
-                    <p>Performs a <a href="https://en.wikipedia.org/wiki/Whois">WhoIs query</a> to obtain the contact's address for the registered domain.</p>
+                    <p>Performs a <a href="https://en.wikipedia.org/wiki/Whois">WhoIs query</a> to obtain the contact address associated with the web domain.</p>
                     <pre class="output"></pre>
                 </div>
                 <div class="col-md-4 alg alg-prior">
@@ -144,7 +143,7 @@
             </div>
             <div class="col-md-4 alg alg-tld">
                 <h4>TLD algorithm:&nbsp;&nbsp;<small class="text-right">(98% accuracy)</small></h4>
-                <p>Identifies the country top-level-domain for associated URLs such as .uk, .de, and .cn.</p>
+                <p>Identifies the country associated with URLs top-level-domains (TLDs) such as .uk, .de, and .cn.</p>
                 <pre class="output"></pre>
             </div>
             <div class="col-md-4 alg alg-ip">

@@ -31,7 +31,7 @@ GP.init = function(dataDir, percentCallback, onComplete) {
 
 GP.loadFile = function(url, callback, caption) {
     callback(caption, 0.0);
-    url += '?' + Math.random();
+    //url += '?' + Math.random();
     $.ajax({
         xhr: function()
         {
