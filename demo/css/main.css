@@ -73,7 +73,7 @@ div.alg pre span.results {
 }
 
 .loading-dialog {
-   position: absolute;;
+   position: fixed;;
    height: 100%;
    width: 100%;
    z-index: 1000;
@@ -94,15 +94,15 @@ table.try td:first-child {
    width: 40px;
 }
 
-div.try h6 {
-   margin: 0 0 5px 0;
-   padding: 0
-}
-
 div.try {
    margin-left: 20px;
    width: 200px;
+}
+
+div.try li {
+   margin-top: 2px;
    font-size: 12px;
+   margin-left: -25px;
    text-overflow: ellipsis;
    white-space: nowrap;
    color: #333;
