@@ -77,7 +77,7 @@
             </p>
             <div class="col-md-7">
                 <p>
-                    Enter a URL below or click a suggested URL on the right to see our algorithm in action.
+                    Enter a URL below or click a suggested URL to see our algorithm in action.
                 </p>
 
                 <div class="queryform">
@@ -92,7 +92,7 @@
                 </div>
             </div>
             <div class="col-md-5 try">
-                <h6>Try these URLs:</h6>
+                Try these suggested URLs:<br/>
                 <ul class="try">
                     <li><a href="#" class="example">http://d-nb.info/gnd/10001229-2</a></li>
                     <li><a href="#" class="example">http://www.bouchard-pereetfils.com/en/village.html</a></li>
@@ -122,7 +122,7 @@
             <div class="row">
                 <div class="col-md-4 alg alg-lang">
                     <h4>Language algorithm:&nbsp;&nbsp;<small class="text-right">(61% accuracy)</small></h4>
-                    <p>Detects the language of a webpage and looks up the countries most likely to speak the language.</p>
+                    <p>Detects the language of a webpage and looks up the countries most likely to speak it.</p>
                     <pre class="output"></pre>
                 </div>
                 <div class="col-md-4 alg alg-whois">
@@ -238,6 +238,9 @@
                             scale: ['#FFFFFF', color.toHexString()],
                             normalizeFunction: 'polynomial'
                         }]
+                    },
+                    onRegionTipShow: function(e, el, code){
+                        el.html(el.html()+' (GDP - '+values[code]+')');
                     }
                 };
                 $('.map-container').empty().vectorMap(config);
