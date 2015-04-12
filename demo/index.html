@@ -290,13 +290,17 @@
                     form.submit();
                    return false;
                 });
-                $("form").submit(function () {
+                $(".queryform form").submit(function () {
                     $(".alg pre").html('');
                     var url = $(this).find("input").val().trim();
                     onMessage(['final','testing inferrence of url ' + url]);
                     onMessage(['final','domain is ' + GP.getDomain(url)]);
                     onMessage(['final', 'registered domain is ' + GP.getRegisteredDomain(url)]);
                     GP.LogisticInferrer(url, onResults, onMessage, onError);
+                    return false;
+                });
+                $(".queryform button").click(function () {
+                    $(".queryform form").submit();
                     return false;
                 });
 
