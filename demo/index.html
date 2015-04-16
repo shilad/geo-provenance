@@ -98,7 +98,7 @@
                 <ul class="try">
                     <li><a href="#" class="example">http://d-nb.info/gnd/10001229-2</a></li>
                     <li><a href="#" class="example">http://www.bouchard-pereetfils.com/en/village.html</a></li>
-                    <li><a href="#" class="example">http://www.inmediahk.net/node/1003132</a></li>
+                    <li><a href="#" class="example">http://whc.unesco.org/en/list/1293</a></li>
                 </ul>
             </div>
         </div>
@@ -212,17 +212,25 @@
                 showMap(name);
             };
 
+
+            var mapColors = {
+                final: 'rgb(41, 128, 185)',
+                prior: 'rgb(192, 57, 43)',
+                lang: 'rgb(39, 174, 96)',
+                whois: 'rgb(211, 84, 0)',
+                ip: 'rgb(230, 126, 34)',
+                tld: 'rgb(142, 68, 173)',
+                wikidata: 'rgb(241, 196, 15)'
+            }
+
             var showMap = function(name) {
                 $('div.alg').each(function (i, div) {
                     div = $(div);
-                    var color = $.Color(div.css('border-color'));
-                    var newColor = color.alpha(div.hasClass('alg-' + name) ? 1.0 : 0.0);
-                    if (color != newColor) {
-                        div.animate({'border-color' : newColor.toRgbaString()}, 200);
-                    }
+                    var color = div.hasClass('alg-' + name) ? mapColors[name] : "#fff";
+                    div.animate({'border-color' : color}, 200);
                 });
 
-                var color = $.Color($('div.alg-' + name).css('border-color'));
+                var color = $.Color(mapColors[name]).toHexString();
 
                 var dist = algDists[name] || {};
                 var values = {};
@@ -237,11 +245,15 @@
                             min: 0.0,
                             max: 1.0,
                             values: values,
-                            scale: ['#FFFFFF', color.toHexString()],
-                            normalizeFunction: 'polynomial'
+                            scale: ['#FFFFFF', color],
+                            normalizeFunction:  function(value) {
+                                if (value < 0.003) return 0.0;
+                                else return Math.pow(value, 0.2);
+                            }
                         }]
                     },
                     onRegionTipShow: function(e, el, code){
+                        $(".jvectormap-tip").filter(function (e) { return e != el; }).hide();
                         el.html(el.html()+' ('+ (100 * values[code]).toFixed(2) +'%)');
                     }
                 };

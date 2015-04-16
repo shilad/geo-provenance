@@ -33,29 +33,8 @@ div.alg p {
 }
 
 div.alg {
-   border: solid 2px #aaa;
+   border: solid 2px #fff;
    border-radius: 5px;
-}
-div.alg.alg-final {
-   border-color: rgba(41, 128, 185, 0.0);
-}
-div.alg.alg-prior {
-   border-color: rgba(192, 57, 43, 0.0);
-}
-div.alg.alg-lang {
-   border-color: rgba(39, 174, 96, 0.0);
-}
-div.alg.alg-whois {
-   border-color: rgba(211, 84, 0, 0.0);
-}
-div.alg.alg-ip {
-   border-color: rgba(230, 126, 34, 0.0);
-}
-div.alg.alg-tld {
-   border-color: rgba(142, 68, 173, 0.0);
-}
-div.alg.alg-wikidata {
-   border-color: rgba(241, 196, 15, 0.0);
 }
 
 div.alg pre {

@@ -225,7 +225,6 @@ GP.WhoIsInferrer = function (url, onResult, onMessage, onError) {
     };
 
     onMessage('Queuing whois query for ' + domain);
-    //
     //return onResult(['freetext', { us : 1.0 }]);
 
     $.ajax({
