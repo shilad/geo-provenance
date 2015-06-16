@@ -88,32 +88,22 @@ def test_wikidata():
     assert(provider.get('https://www.ibm.com/foo/bar') == 'us')
 
 
-def test_rebuild():
-    rebuild()
-
 def test_coord_to_country():
     assert(coord_to_country("25.269722|55.309444|0.000000|0") == 'ae')
 
 
-NOMINATIM = None
-
 def coord_to_country(wikidata_coord):
-    global NOMINATIM
-
-    if not NOMINATIM:
-        from geopy.geocoders import Nominatim
-        NOMINATIM = Nominatim()
-
     parts = wikidata_coord.split('|')
     lat = float(parts[0])
     lng = float(parts[1])
 
-    location = NOMINATIM.reverse(str(lat) + "," + str(lng))
-    if location and location.raw and 'address' in location.raw:
-        return location.raw['address'].get('country_code')
+    url = 'http://open.mapquestapi.com/nominatim/v1/reverse.php?format=json&lat=%.4f&lon=%.4f' % (lat, lng)
+    f = urllib2.urlopen(url)
+    js = json.load(f)
+    if js and js['address'] and js['address']['country_code']:
+        return js['address']['country_code']
     else:
         return None
-
 
 def rebuild():
     all_urls = 'http://wdq.wmflabs.org/api?props=856,159,625&q=CLAIM[856]%20AND%20(CLAIM[159]%20OR%20CLAIM[625])'
