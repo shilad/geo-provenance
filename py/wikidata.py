@@ -97,7 +97,7 @@ def coord_to_country(wikidata_coord):
     lat = float(parts[0])
     lng = float(parts[1])
 
-    url = 'http://open.mapquestapi.com/nominatim/v1/reverse.php?format=json&lat=%.4f&lon=%.4f' % (lat, lng)
+    url = 'http://nominatim.openstreetmap.org/reverse?format=json&lat=%.4f&lon=%.4f' % (lat, lng)
     f = urllib2.urlopen(url)
     js = json.load(f)
     if js and js['address'] and js['address']['country_code']:
